@@ -5,7 +5,7 @@
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #111;
+  background: var(--surface-3);
   border: 2px solid var(--ua-frame);
   color: #fff;
   font-weight: 900;
@@ -31,9 +31,9 @@
 
 .ua-title {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 1.5px;
-  color: var(--ua-title-color, #ffd659);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ua-title-color, var(--gold));
   text-transform: uppercase;
 }

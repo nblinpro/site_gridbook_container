@@ -157,6 +157,37 @@ Connexion MySQL sur `127.0.0.1`, port `3308`, utilisateur et mot de passe de `.e
 - Utilisateurs et crédits : passer par l'onglet **🧾 COMPTES** plutôt que par SQL (les
   mots de passe sont hachés et chaque mouvement de crédits crée une transaction).
 
+## Interface
+
+Style « broadcast » (applications officielles de sport mécanique) : la charte, les composants
+communs et leurs règles d'usage sont décrits dans [`docs/design-system.md`](docs/design-system.md).
+
+Pour travailler sur le frontend sans reconstruire l'image Docker :
+
+```bash
+cd frontend
+VITE_API_URL=/api npx vite --port 5180   # /api est relayé vers le backend Docker (port 8001)
+```
+
+## Tests de bout en bout
+
+`e2e/run.mjs` rejoue le parcours complet dans un vrai navigateur (Playwright) :
+
+- côté joueur : inscription, les 3 championnats, un pari par championnat, un pari de saison,
+  une annulation, achats en boutique ;
+- côté admin : synchronisation, validation d'un résultat avec versement du gain, création de
+  compte, crédit de solde, catalogue de la boutique ;
+- contrôle de l'affichage mobile (390 px).
+
+Les comptes et les données créés par le test sont supprimés à la fin.
+
+```bash
+cd e2e
+npm install && npx playwright install --with-deps chromium   # une fois
+BASE_URL=http://localhost:5174 node run.mjs
+node screenshots.mjs ../e2e/screenshots 1440 full   # captures de toutes les pages (revue visuelle)
+```
+
 ## Points d'API ajoutés par rapport à GridBook
 
 | Méthode | Route | Rôle |

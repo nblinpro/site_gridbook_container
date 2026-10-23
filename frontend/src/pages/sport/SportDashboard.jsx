@@ -9,6 +9,8 @@ import { formatApiError } from "../../services/apiError";
 import { countdown, formatApex, formatDay, formatTime } from "../../utils/format";
 import { f1ResultsPath, formatPoints, orderRaces, placeOf, splitCountdown, teamColor, useNow } from "./sportFormat";
 import { DateBlock, ErrorAlert, SkeletonRows } from "./SportBits";
+import TrackSchematic from "../../components/circuit/TrackSchematic";
+import { CIRCUIT_DETAILS } from "../../data/circuitData";
 import "./sport.css";
 
 // Résultat d'un appel : { data, error } ; data reste null pendant le chargement.
@@ -57,8 +59,13 @@ function Countdown({ iso }) {
   );
 }
 
+// Image du tracé : fournie par l'API (MotoGP, NASCAR) ou fiche F1 locale (public/<grand_prix>.png)
+const f1Image = (name) => CIRCUIT_DETAILS[name.toLowerCase().replace(/ grand prix/g, "").trim().replace(/\s+/g, "_")]?.image;
+
 function NextEventHero({ race, discipline, entrants }) {
   const { circuit } = race;
+  const [imageFailed, setImageFailed] = useState(false);
+  const image = circuit?.image_url || (race.discipline === "f1" ? f1Image(race.name) : null);
   const facts = [
     circuit?.length_km && { label: "Longueur", value: `${Number(circuit.length_km).toLocaleString("fr-FR")} km` },
     circuit?.turns && { label: "Virages", value: circuit.turns },
@@ -94,10 +101,10 @@ function NextEventHero({ race, discipline, entrants }) {
       </div>
 
       <div className="next-hero-visual">
-        {circuit?.image_url ? (
-          <img src={circuit.image_url} alt={`Tracé du circuit ${circuit.name || ""}`} className="next-hero-track" loading="lazy" />
+        {image && !imageFailed ? (
+          <img src={image} alt={`Tracé du circuit ${circuit?.name || race.name}`} className="next-hero-track" loading="lazy" onError={() => setImageFailed(true)} />
         ) : (
-          <span className="next-hero-round" aria-hidden>{String(race.round).padStart(2, "0")}</span>
+          <TrackSchematic schematic={{ type: race.discipline === "nascar" ? circuit?.details?.type : "road course", description: circuit?.description }} />
         )}
         {facts.length > 0 && (
           <dl className="next-hero-facts">

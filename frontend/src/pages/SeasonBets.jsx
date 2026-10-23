@@ -1,152 +1,222 @@
-import React, { useEffect, useState, useCallback } from "react";
-import apiClient from "../services/apiClient";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
-import F1LightsLoader from "../components/loader/F1LightsLoader";
+import PageHeader from "../components/ui/PageHeader";
+import Icon from "../components/ui/Icon";
+import ParticipantPicker from "../components/bets/ParticipantPicker";
+import AmountField from "../components/bets/AmountField";
+import { estimateOdds, stakeError } from "../components/bets/odds";
 import { useAuth } from "../auth/AuthContext";
 import { useToast } from "../components/toast/ToastContext";
-import "./placeBet.css";
-import "./seasonBets.css";
+import apiClient from "../services/apiClient";
 import { formatApiError } from "../services/apiError";
+import { formatApex, formatOdds } from "../utils/format";
+import "./seasonBets.css";
 
-function BetPanel({ title, betType, items, season, user, toast, onPlaced }) {
+const EMPTY_POOL = { total_pool: 0, stats: {} };
+
+/** Un marché de fin de saison (champion pilotes ou champion équipes). */
+function SeasonMarket({ title, betType, items, season, leader, activeBet, wallet, onPlaced }) {
+  const toast = useToast();
+  const amountId = useId();
   const [selection, setSelection] = useState("");
-  const [amount, setAmount] = useState(10);
-  const [pool, setPool] = useState({ total_pool: 0, stats: {} });
+  const [amount, setAmount] = useState("50");
+  const [pool, setPool] = useState(EMPTY_POOL);
+  const [poolError, setPoolError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   const loadPool = useCallback(() => {
     apiClient.get(`/bets/season-pool/${season}/${betType}`)
-      .then(res => setPool(res.data))
-      .catch(() => setPool({ total_pool: 0, stats: {} }));
+      .then((res) => { setPool(res.data); setPoolError(false); })
+      .catch(() => { setPool(EMPTY_POOL); setPoolError(true); });
   }, [season, betType]);
 
   useEffect(() => { loadPool(); }, [loadPool]);
 
-  const probableOdds = selection && pool.stats[selection] ? pool.stats[selection].probable_odds : "—";
+  const oddsFor = (id) => pool.stats[id]?.probable_odds || null;
+  const error = stakeError(amount, wallet);
+  const selected = items.find((it) => String(it.id) === selection);
+  const estimate = selection && !error ? estimateOdds(pool.total_pool, pool.stats[selection]?.total_bet, amount) : 0;
 
-  const handlePlace = async () => {
-    if (!selection) return toast.warning("Sélectionne un favori avant de valider.");
-    const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount <= 0) return toast.warning("Le montant doit être positif.");
-    if (user && parsedAmount > parseFloat(user.wallet || 0)) return toast.warning("Solde insuffisant.");
-
+  const place = async () => {
+    setTouched(true);
+    if (!selection || error) return;
     try {
       setSubmitting(true);
       await apiClient.post("/bets/place-season", {
         season_id: season,
         bet_type: betType,
-        selection_id: parseInt(selection),
-        amount: parsedAmount,
+        selection_id: Number(selection),
+        amount: Number(amount),
       });
-      toast.success("Pari saison enregistré !");
+      toast.success(`Pari enregistré : ${selected?.name} ${title.toLowerCase()}.`);
       window.dispatchEvent(new Event("refreshDashboard"));
       setSelection("");
+      setTouched(false);
       loadPool();
-      onPlaced?.();
+      onPlaced();
     } catch (err) {
-      toast.error(formatApiError(err, "Erreur lors de l'enregistrement du pari."));
+      toast.error(formatApiError(err, "Le pari n'a pas été enregistré."));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="season-panel">
-      <div className="season-panel-header">
-        <h3>{title}</h3>
-        <span className="season-pool-total">CAGNOTTE : {pool.total_pool.toLocaleString()} APEX</span>
-      </div>
-      <div className="season-panel-body">
-        <div className="input-block">
-          <label className="terminal-label">FAVORI</label>
-          <select className="hud-select" value={selection} onChange={e => setSelection(e.target.value)}>
-            <option value="">-- SÉLECTIONNER --</option>
-            {items.map(item => (
-              <option key={item.id} value={item.id}>
-                {item.name}{pool.stats[item.id] ? ` (cote ${pool.stats[item.id].probable_odds})` : ""}
-              </option>
-            ))}
-          </select>
+    <section className="card card-flush card-accent sb-market" aria-labelledby={`${betType}-title`}>
+      <div className="card-head">
+        <div>
+          <h2 id={`${betType}-title`} className="card-title">{title}</h2>
+          {leader && <span className="card-subtitle">En tête aujourd'hui : <strong>{leader.name}</strong> · {formatApex(leader.points)} pts</span>}
         </div>
-        <div className="input-block">
-          <label className="terminal-label">MONTANT (APEX)</label>
-          <input type="number" min="1" step="1" className="hud-input" value={amount} onChange={e => setAmount(e.target.value)} />
+        <div className="sb-pot">
+          <span className="stat-label">Cagnotte</span>
+          <span className="sb-pot-value num">{formatApex(pool.total_pool)} <small>APEX</small></span>
         </div>
-        <div className="season-odds-preview">Cote probable actuelle : <strong>{probableOdds}</strong></div>
-        <button className="hud-btn-main" onClick={handlePlace} disabled={!selection || submitting}>
-          {submitting ? "ENVOI..." : "PLACER LE PARI"}
-        </button>
       </div>
-    </div>
+
+      <div className="sb-body">
+        {poolError && <div className="alert alert-warning"><Icon name="info" size={16} />Cotes momentanément indisponibles.</div>}
+
+        {activeBet ? (
+          <div className="sb-active">
+            <span className="badge badge-info">Pari en cours</span>
+            <strong className="sb-active-pick">{activeBet.driver_name}</strong>
+            <div className="sb-active-grid">
+              <div className="stat"><span className="stat-label">Mise</span><span className="sb-active-value num">{formatApex(activeBet.amount)} <small>APEX</small></span></div>
+              <div className="stat"><span className="stat-label">Cote actuelle</span><span className="sb-active-value num">{formatOdds(activeBet.odds)}</span></div>
+              <div className="stat"><span className="stat-label">Gain potentiel</span><span className="sb-active-value num up">{formatApex(activeBet.potential_gain)} <small>APEX</small></span></div>
+            </div>
+            <p className="muted sb-note">Un seul pari par classement et par saison. Il sera réglé à la clôture du championnat.</p>
+          </div>
+        ) : (
+          <>
+            <ParticipantPicker
+              items={items}
+              value={selection}
+              onChange={setSelection}
+              legend={`Ton favori · ${items.length} engagés`}
+              searchPlaceholder="Rechercher"
+              oddsFor={oddsFor}
+            />
+            {touched && !selection && <span className="field-error">Choisis un favori.</span>}
+
+            <AmountField id={amountId} value={amount} onChange={setAmount} wallet={wallet} error={touched ? error : null} />
+
+            <dl className="sb-summary">
+              <div className="kv"><dt>Sélection</dt><dd><strong>{selected?.name || "—"}</strong></dd></div>
+              <div className="kv"><dt>Cote estimée</dt><dd><strong className="num">{estimate ? formatOdds(estimate) : "—"}</strong></dd></div>
+              <div className="kv sb-gain"><dt>Gain estimé</dt><dd><strong className="num">{estimate ? `${formatApex(estimate * Number(amount))} APEX` : "—"}</strong></dd></div>
+            </dl>
+
+            <button className="btn btn-primary btn-lg btn-block" onClick={place} disabled={submitting}>
+              {submitting ? "Enregistrement…" : selected ? `Parier ${formatApex(amount)} APEX sur ${selected.name}` : "Choisis un favori"}
+            </button>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 
 export default function SeasonBets({ discipline }) {
   const { user } = useAuth();
-  const toast = useToast();
   const [seasons, setSeasons] = useState([]);
   const [season, setSeason] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [standings, setStandings] = useState(null);
+  const [myBets, setMyBets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const { labels } = discipline;
+
+  const loadMyBets = useCallback(() => {
+    apiClient.get("/bets/my_bets").then((res) => setMyBets(res.data)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
+    setLoadError(false);
     const q = `?discipline=${discipline.slug}`;
-    Promise.all([
-      apiClient.get(`/seasons/${q}`),
-      apiClient.get(`/drivers/${q}`),
-      apiClient.get(`/teams/${q}`),
-    ]).then(([sRes, dRes, tRes]) => {
-      setSeasons(sRes.data);
-      // Saison active par défaut (la plus récente sinon) : son id sert de clé aux paris
-      setSeason((sRes.data.find(s => s.is_active) || sRes.data[0])?.id ?? null);
-      setDrivers(dRes.data);
-      setTeams(tRes.data);
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, [discipline.slug]);
+    Promise.all([apiClient.get(`/seasons/${q}`), apiClient.get(`/drivers/${q}`), apiClient.get(`/teams/${q}`)])
+      .then(([s, d, t]) => {
+        setSeasons(s.data);
+        // Saison active par défaut (sinon la plus récente) : son id sert de clé aux paris
+        setSeason((s.data.find((x) => x.is_active) || s.data[0])?.id ?? null);
+        setDrivers([...d.data].sort((a, b) => a.name.localeCompare(b.name)));
+        setTeams([...t.data].sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+    // Classement officiel : contexte utile mais facultatif
+    apiClient.get(`/standings/${discipline.slug}`).then((res) => setStandings(res.data)).catch(() => setStandings(null));
+    loadMyBets();
+  }, [discipline.slug, loadMyBets]);
 
-  if (loading) return <F1LightsLoader label="CHARGEMENT_CLASSEMENTS..." />;
+  const activeBet = useMemo(() => {
+    const pending = myBets.filter((b) => b.status === "pending" && b.race_id == null && b.season_id === season);
+    return { season_driver: pending.find((b) => b.bet_type === "season_driver"), season_team: pending.find((b) => b.bet_type === "season_team") };
+  }, [myBets, season]);
+
+  const year = seasons.find((s) => s.id === season)?.year;
+  const seasonSelect = seasons.length > 1 && (
+    <label className="sb-season">
+      <span className="sr-only">Saison</span>
+      <select className="select" value={season ?? ""} onChange={(e) => setSeason(Number(e.target.value))}>
+        {seasons.map((s) => <option key={s.id} value={s.id}>Saison {s.year}</option>)}
+      </select>
+    </label>
+  );
 
   return (
     <Layout>
-      <div className="season-page f1-grid-bg" style={{ "--sport-accent": discipline.accent }}>
-        <header className="hud-header">
-          <div className="hud-title-group">
-            <span className="hud-tag">// CHAMPIONSHIP_MARKETS · {discipline.name.toUpperCase()}</span>
-            <h1 className="hud-main-title">PARIS DE SAISON</h1>
-          </div>
-          <div className="input-block season-select-block">
-            <label className="terminal-label">SAISON</label>
-            <select className="hud-select" value={season ?? ""} onChange={e => setSeason(parseInt(e.target.value))}>
-              {seasons.map(s => <option key={s.id} value={s.id}>{s.year}</option>)}
-            </select>
-          </div>
-        </header>
+      <div className="page">
+        <PageHeader
+          eyebrow={`${discipline.name}${year ? ` · saison ${year}` : ""}`}
+          title="Paris de saison"
+          subtitle={`Désigne le ${labels.championDriver.toLowerCase()} et le ${labels.championTeam.toLowerCase()} avant la fin du championnat. Plus tu paries tôt, plus la cote peut être élevée.`}
+          actions={seasonSelect}
+        />
 
-        <p className="season-hint">
-          Parie sur le {labels.championDriver.toLowerCase()} et le {labels.championTeam.toLowerCase()} de fin de saison. Un seul pari actif par classement et par saison.
+        {loading ? (
+          <div className="grid grid-2"><div className="skeleton" style={{ height: 560 }} /><div className="skeleton" style={{ height: 560 }} /></div>
+        ) : loadError ? (
+          <div className="alert alert-danger"><Icon name="info" size={16} />Impossible de charger les marchés de saison. Réessaie dans un instant.</div>
+        ) : !season ? (
+          <div className="empty-state"><span className="empty-state-title">Aucune saison ouverte</span><p>Les marchés de ce championnat ouvriront avec la prochaine saison.</p></div>
+        ) : (
+          <div className="grid grid-2 sb-grid">
+            <SeasonMarket
+              key={`d-${season}`}
+              title={labels.championDriver}
+              betType="season_driver"
+              items={drivers}
+              season={season}
+              leader={standings?.drivers?.[0]}
+              activeBet={activeBet.season_driver}
+              wallet={user?.wallet}
+              onPlaced={loadMyBets}
+            />
+            <SeasonMarket
+              key={`t-${season}`}
+              title={labels.championTeam}
+              betType="season_team"
+              items={teams}
+              season={season}
+              leader={standings?.teams?.[0]}
+              activeBet={activeBet.season_team}
+              wallet={user?.wallet}
+              onPlaced={loadMyBets}
+            />
+          </div>
+        )}
+
+        <p className="muted sb-footnote">
+          Pari mutuel : la cagnotte est partagée entre les joueurs qui ont trouvé le champion, au prorata de leur mise.{" "}
+          <Link to={discipline.routes.standings} className="btn-link">Voir les classements <Icon name="arrowRight" size={14} /></Link>
         </p>
-
-        {!season ? <p className="season-hint">Aucune saison disponible pour ce championnat.</p> : <div className="season-panels-grid">
-          <BetPanel
-            title={labels.championDriver.toUpperCase()}
-            betType="season_driver"
-            items={drivers}
-            season={season}
-            user={user}
-            toast={toast}
-          />
-          <BetPanel
-            title={labels.championTeam.toUpperCase()}
-            betType="season_team"
-            items={teams}
-            season={season}
-            user={user}
-            toast={toast}
-          />
-        </div>}
       </div>
     </Layout>
   );

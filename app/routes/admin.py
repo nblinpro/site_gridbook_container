@@ -40,7 +40,7 @@ def close_race(
     result = settle_race(db, race, winner)
     db.commit()
     return {
-        "message": f"Résultats validés. Côte finale : {result['final_odds']}",
+        "message": f"Résultats validés. Cote finale : {result['final_odds']}",
         "final_odds": result["final_odds"],
     }
 
