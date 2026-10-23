@@ -1,0 +1,114 @@
+/*
+ * Charte GridBook : style « broadcast » (appli officielle de sport mécanique).
+ * Toutes les pages piochent dans ces variables : aucune couleur, taille ou
+ * espacement en dur dans les feuilles de style des pages. Voir docs/design-system.md.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+
+  /* --- Marque --- */
+  --brand: #e10600;
+  --brand-hover: #ff1e14;
+  --brand-soft: rgba(225, 6, 0, 0.14);
+
+  /* Couleur du sport courant : redéfinie par l'AppShell (F1 rouge, MotoGP orange, NASCAR jaune) */
+  --sport: var(--brand);
+  --sport-contrast: #fff; /* texte posé sur --sport */
+
+  /* --- Surfaces (du plus profond au plus élevé) --- */
+  --bg: #0b0b0f;
+  --surface-1: #121218;
+  --surface-2: #181820;
+  --surface-3: #20202a;
+  --overlay: rgba(5, 5, 8, 0.72);
+
+  --border: #262630;
+  --border-strong: #34343f;
+
+  /* --- Texte (contrastes AA sur --surface-1) --- */
+  --text: #f4f4f6;
+  --text-2: #b4b4c0;
+  --text-3: #8a8a98;
+  --text-on-brand: #ffffff;
+
+  /* --- États --- */
+  --success: #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.14);
+  --warning: #f5a524;
+  --warning-soft: rgba(245, 165, 36, 0.14);
+  --danger: #f04438;
+  --danger-soft: rgba(240, 68, 56, 0.14);
+  --info: #38bdf8;
+  --info-soft: rgba(56, 189, 248, 0.14);
+  --gold: #f5c542;
+  --silver: #c6ccd6;
+  --bronze: #d08a4f;
+
+  /* --- Typographie --- */
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Barlow Condensed', 'Inter', system-ui, sans-serif;
+
+  --fs-xs: 0.75rem;   /* 12 */
+  --fs-sm: 0.8125rem; /* 13 */
+  --fs-md: 0.9375rem; /* 15 : texte courant */
+  --fs-lg: 1.125rem;  /* 18 */
+  --fs-xl: 1.5rem;    /* 24 */
+  --fs-2xl: 2rem;     /* 32 */
+  --fs-3xl: 2.75rem;  /* 44 */
+
+  /* --- Espacements (base 4 px) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* --- Formes --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 18px 48px rgba(0, 0, 0, 0.55);
+
+  /* --- Mise en page --- */
+  --topbar-h: 64px;
+  --subnav-h: 48px;
+  --content-max: 1320px;
+  --rail-w: 320px;
+  --gutter: var(--sp-8);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+
+  /* Anciennes variables : conservées pour les composants non encore migrés */
+  --color-accent: var(--brand);
+  --color-bg-page: var(--bg);
+  --color-bg-panel: var(--surface-1);
+  --color-bg-card: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-3);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-body: var(--font-ui);
+  --sport-accent: var(--sport);
+}
+
+/* Une variable dérivée est calculée là où elle est déclarée : on la redéclare sur
+   chaque élément qui change --sport (style inline), sinon elle resterait rouge. */
+:root, [style*="--sport"] {
+  --sport-soft: color-mix(in srgb, var(--sport) 14%, transparent);
+}
+
+@media (max-width: 900px) {
+  :root { --gutter: var(--sp-4); --fs-3xl: 2.125rem; --fs-2xl: 1.625rem; }
+}

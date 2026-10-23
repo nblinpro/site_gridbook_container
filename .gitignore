@@ -1,0 +1,29 @@
+# F1_FANTASY
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Frontend
+f1_fantasy/frontend/node_modules/
+f1_fantasy/frontend/dist/
+f1_fantasy/frontend/.env
+
+# Backend (Python/FastAPI)
+f1_fantasy/backend/__pycache__/
+f1_fantasy/backend/venv/
+f1_fantasy/backend/.env
+*.db
+*.pyc
+
+# Divers
+.DS_Store
+gh_2.44.1_linux_amd64.deb
+*.bak
+
+# Gridbook_new
+node_modules/
+frontend/dist/
+e2e/screenshots/
+e2e/node_modules/

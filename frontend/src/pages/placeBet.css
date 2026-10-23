@@ -1,0 +1,93 @@
+/* Page de pari sur une course : en-tête de l'épreuve, bulletin (à droite), fiche circuit */
+
+.pb-back { display: inline-flex; align-items: center; gap: var(--sp-1); align-self: flex-start; font-size: var(--fs-sm); font-weight: 600; color: var(--text-2); }
+.pb-back:hover { color: var(--text); }
+.pb-back-icon { transform: rotate(180deg); }
+.pb { gap: var(--sp-5); }
+
+/* --- En-tête --- */
+.pb-hero {
+  position: relative; overflow: hidden; flex-direction: row; align-items: flex-end; justify-content: space-between;
+  gap: var(--sp-6); padding: var(--sp-6); flex-wrap: wrap;
+  background: linear-gradient(120deg, var(--sport-soft), transparent 55%), var(--surface-1);
+}
+.pb-hero::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--sport); }
+.pb-hero-main { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; flex: 1 1 420px; }
+.pb-hero-badges { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.pb-hero-kicker { font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.pb-title { overflow-wrap: anywhere; }
+.pb-hero-meta { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-6); font-size: var(--fs-sm); color: var(--text-2); }
+.pb-hero-meta li { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; flex-wrap: wrap; }
+.pb-hero-meta .icon { color: var(--text-3); flex-shrink: 0; }
+.pb-hero-meta strong { color: var(--text); font-weight: 600; }
+.pb-hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-3); flex-shrink: 0; }
+.pb-hero-stat { align-items: flex-end; text-align: right; }
+.pb-hero-value { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1; color: var(--text); text-transform: uppercase; }
+.pb-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.6s ease-in-out infinite; }
+
+/* --- Grille : fiche circuit à gauche, bulletin collant à droite --- */
+.pb-layout { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: var(--sp-6); align-items: start; }
+.pb-main { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+.pb-slip-col { grid-column: 2; grid-row: 1; position: sticky; top: calc(var(--topbar-h) + var(--subnav-h) + var(--sp-5)); min-width: 0; }
+.pb-skel-slip { height: 560px; grid-column: 2; grid-row: 1; }
+.pb-skel-main { height: 560px; grid-column: 1; grid-row: 1; }
+
+/* --- Bulletin --- */
+.pb-slip { border-color: var(--border-strong); box-shadow: var(--shadow-2); }
+.pb-slip > .card-head { background: var(--surface-2); }
+.pb-slip .card-title { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.pb-slip .card-title .icon { color: var(--sport); }
+.pb-slip-body { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
+.pb-closed { display: flex; flex-direction: column; gap: var(--sp-2); }
+.pb-slip .alert .icon { flex-shrink: 0; margin-top: 2px; color: var(--warning); }
+.pb-slip .empty-state { padding: var(--sp-6) var(--sp-4); }
+
+/* --- Fiche circuit --- */
+.pb-circuit-head { display: flex; flex-direction: column; min-width: 0; }
+.pb-track {
+  display: grid; place-items: center; padding: var(--sp-6); min-height: 280px;
+  background: radial-gradient(ellipse at center, var(--surface-2), var(--surface-1) 70%); border-bottom: 1px solid var(--border);
+}
+.pb-track-img { max-height: 320px; width: auto; max-width: 100%; object-fit: contain; }
+.pb-track.is-schematic { min-height: 240px; }
+
+.pb-stats { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border-bottom: 1px solid var(--border); }
+.pb-stat { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4) var(--sp-5); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: -1px; min-width: 0; }
+.pb-stat.is-wide { grid-column: span 2; }
+.pb-stat dd { margin: 0; }
+.pb-stat-value { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.1; color: var(--text); overflow-wrap: anywhere; }
+.pb-stat-sub { font-size: var(--fs-xs); color: var(--text-3); }
+.pb-stat.is-accent { box-shadow: inset 0 3px 0 var(--sport); }
+.pb-stat.is-accent .pb-stat-value { color: var(--sport); }
+
+.pb-sections { display: flex; flex-direction: column; }
+.pb-section { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5); border-bottom: 1px solid var(--border); }
+.pb-section:last-child { border-bottom: 0; }
+.pb-section-title { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.pb-section p { color: var(--text-2); font-size: var(--fs-md); line-height: 1.65; max-width: 72ch; }
+.pb-partial { padding: var(--sp-5); font-size: var(--fs-sm); }
+.pb-circuit-empty { padding: var(--sp-5); }
+
+/* --- Adaptation --- */
+@media (max-width: 1100px) {
+  .pb-layout { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-4); }
+}
+@media (max-width: 900px) {
+  .pb-layout { grid-template-columns: minmax(0, 1fr); }
+  .pb-main, .pb-slip-col, .pb-skel-slip, .pb-skel-main { grid-column: 1; grid-row: auto; }
+  .pb-slip-col { position: static; }
+  .pb-skel-main { display: none; }
+}
+@media (max-width: 600px) {
+  .pb-hero { padding: var(--sp-5) var(--sp-4); gap: var(--sp-4); }
+  .pb-hero-main { flex-basis: 100%; }
+  .pb-hero-side { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; padding-top: var(--sp-4); border-top: 1px solid var(--border); }
+  .pb-hero-stat { align-items: flex-end; }
+  .pb-hero-value { font-size: var(--fs-xl); }
+  .pb-slip-body { padding: var(--sp-4); }
+  .pb-track { min-height: 200px; padding: var(--sp-4); }
+  .pb-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pb-stat { padding: var(--sp-3) var(--sp-4); }
+  .pb-stat.is-wide { grid-column: span 2; }
+  .pb-section { padding: var(--sp-4); }
+}

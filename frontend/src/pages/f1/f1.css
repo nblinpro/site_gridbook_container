@@ -1,0 +1,67 @@
+/* Pages Grand Prix F1 (détails, résultats). Les blocs communs viennent de ../sport/sport.css. */
+
+.back-link { align-self: flex-start; margin-bottom: calc(var(--sp-2) * -1); }
+.flip { transform: scaleX(-1); }
+
+/* ---------- Détails ---------- */
+.gp-badges { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-1); }
+.gp-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.gp-side { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+.gp-track { width: 100%; max-height: 200px; object-fit: contain; }
+.gp-facts { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; }
+.gp-facts dd { margin: 0; text-align: right; }
+
+.session-list { list-style: none; margin: 0; padding: 0; }
+.session-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 64px 80px; align-items: center; gap: var(--sp-4); padding: var(--sp-3) var(--sp-5); font-size: var(--fs-sm); }
+.session-row + .session-row { border-top: 1px solid var(--border); }
+.session-name { color: var(--text); font-weight: 600; }
+.session-day { color: var(--text-2); }
+.session-time { color: var(--text); font-weight: 600; text-align: right; }
+.session-state { display: flex; justify-content: flex-end; }
+.session-row.is-main { background: linear-gradient(90deg, var(--sport-soft), transparent 70%); box-shadow: inset 3px 0 0 var(--sport); }
+.session-row.is-main .session-name { font-family: var(--font-display); font-size: var(--fs-lg); text-transform: uppercase; letter-spacing: 0.02em; }
+
+/* ---------- Résultats : podium ---------- */
+.results-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+.podium-card { position: relative; overflow: hidden; gap: var(--sp-3); border-top: 3px solid var(--team, var(--border-strong)); }
+.podium-card::after { content: ""; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--team, var(--sport)) 18%, transparent), transparent 70%); pointer-events: none; }
+.podium-card-head { display: flex; align-items: center; justify-content: space-between; }
+.podium-number { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; color: var(--border-strong); line-height: 1; }
+.podium-driver { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+.podium-first { font-size: var(--fs-sm); color: var(--text-2); }
+.podium-last { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; text-transform: uppercase; color: var(--text); overflow-wrap: anywhere; }
+.podium-meta { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); flex-wrap: wrap; font-size: var(--fs-sm); color: var(--text-2); }
+.podium-meta .team-bar { height: 14px; }
+
+/* ---------- Résultats : tableau ---------- */
+.fastest-lap { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-xs); color: var(--text-2); }
+.fastest-lap .icon { color: var(--info); }
+.fastest-lap strong { color: var(--text); }
+.results-table td { padding-top: var(--sp-2); padding-bottom: var(--sp-2); }
+.result-driver { display: inline-flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; color: var(--text-2); }
+.result-driver strong { color: var(--text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
+.result-number { min-width: 22px; font-size: var(--fs-xs); color: var(--text-3); font-weight: 600; }
+.grid-cell { display: inline-flex; align-items: center; gap: var(--sp-2); justify-content: flex-end; }
+.delta { font-size: var(--fs-xs); font-weight: 600; min-width: 34px; text-align: right; white-space: nowrap; }
+.delta.up { color: var(--success); }
+.delta.down { color: var(--danger); }
+.pos-out { background: var(--danger-soft); color: var(--danger); font-family: var(--font-ui); font-size: var(--fs-xs); padding: 0 var(--sp-1); }
+.results-table tr.is-out td { color: var(--text-3); }
+
+@media (max-width: 900px) {
+  .gp-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .results-podium { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .podium-card { flex-direction: row; align-items: center; padding: var(--sp-3) var(--sp-4); }
+  .podium-card::after, .podium-number { display: none; }
+  .podium-driver { flex: 1; }
+  .podium-last { font-size: var(--fs-xl); }
+  .podium-meta { flex-direction: column; align-items: flex-end; gap: 0; font-size: var(--fs-xs); }
+  .session-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; padding: var(--sp-3) var(--sp-4); }
+  .session-day { grid-column: 1; grid-row: 2; font-size: var(--fs-xs); color: var(--text-3); }
+  .session-time { grid-column: 2; grid-row: 1; }
+  .session-state { grid-column: 2; grid-row: 2; }
+  .results-table td, .results-table th { padding-left: var(--sp-2); padding-right: var(--sp-2); }
+  .result-number { display: none; }
+}

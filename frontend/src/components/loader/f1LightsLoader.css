@@ -1,0 +1,72 @@
+/* Chargement pleine page : portique des feux de départ (5 colonnes). */
+.lights-loader {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding: var(--sp-6) var(--gutter);
+  background: var(--bg);
+}
+
+.lights-gantry {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.lights-pod {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.lights-lamp {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.lights-lamp-on { animation: 3s var(--ease) infinite; }
+.lights-lamp-1 { animation-name: lamp-1; }
+.lights-lamp-2 { animation-name: lamp-2; }
+.lights-lamp-3 { animation-name: lamp-3; }
+.lights-lamp-4 { animation-name: lamp-4; }
+.lights-lamp-5 { animation-name: lamp-5; }
+
+/* Allumage un par un, puis extinction simultanée : « c'est parti ». */
+@keyframes lamp-1 { 0%, 8% { background: var(--surface-3); } 10%, 80% { background: var(--brand); box-shadow: 0 0 12px var(--brand); } 82%, 100% { background: var(--surface-3); } }
+@keyframes lamp-2 { 0%, 20% { background: var(--surface-3); } 22%, 80% { background: var(--brand); box-shadow: 0 0 12px var(--brand); } 82%, 100% { background: var(--surface-3); } }
+@keyframes lamp-3 { 0%, 32% { background: var(--surface-3); } 34%, 80% { background: var(--brand); box-shadow: 0 0 12px var(--brand); } 82%, 100% { background: var(--surface-3); } }
+@keyframes lamp-4 { 0%, 44% { background: var(--surface-3); } 46%, 80% { background: var(--brand); box-shadow: 0 0 12px var(--brand); } 82%, 100% { background: var(--surface-3); } }
+@keyframes lamp-5 { 0%, 56% { background: var(--surface-3); } 58%, 80% { background: var(--brand); box-shadow: 0 0 12px var(--brand); } 82%, 100% { background: var(--surface-3); } }
+
+.lights-label {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-2);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lights-lamp-on { animation: none; background: var(--brand); }
+}
+
+@media (max-width: 480px) {
+  .lights-gantry { gap: var(--sp-1); padding: var(--sp-2); }
+  .lights-pod { padding: 6px; gap: 6px; }
+  .lights-lamp { width: 16px; height: 16px; }
+}

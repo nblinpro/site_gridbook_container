@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&family=Titillium+Web:wght@400;700&display=swap');
+
+.shop-page {
+  --rarity-common: #8a8a8a;
+  --rarity-rare: #00e5ff;
+  --rarity-epic: #b14cff;
+  --rarity-legendary: #ffd700;
+  padding: 0 40px 40px;
+  color: #fff;
+  font-family: 'Titillium Web', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- EN-TÊTE + APERÇU DU PROFIL --- */
+.shop-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.shop-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 3px; color: #00e5ff; }
+.shop-title { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; margin: 4px 0; letter-spacing: 2px; }
+.shop-subtitle { color: #888; margin: 0; max-width: 520px; font-size: 0.9rem; }
+
+.shop-preview {
+  display: flex; align-items: center; gap: 18px;
+  background: #0a0a0a; border: 1px solid #1a1a1a; border-left: 3px solid #00e5ff;
+  padding: 16px 22px; min-width: 300px;
+}
+.shop-preview-meta { display: flex; flex-direction: column; gap: 3px; }
+.shop-preview-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; color: #666; }
+.shop-preview-name { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; text-transform: uppercase; }
+.shop-preview-wallet { font-size: 0.8rem; color: #00d2be; font-weight: 700; }
+.shop-preview-wallet small { color: #666; }
+
+/* --- FILTRES --- */
+.shop-toolbar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.shop-filters, .shop-views { display: flex; gap: 6px; flex-wrap: wrap; }
+.shop-filters button, .shop-views button {
+  background: #0d0d0d; border: 1px solid #1f1f1f; color: #888;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+  padding: 8px 14px; cursor: pointer;
+}
+.shop-filters button:hover, .shop-views button:hover { color: #fff; border-color: #333; }
+.shop-filters button.active { background: #fff; color: #000; border-color: #fff; }
+.shop-views button.active { background: #00e5ff; color: #000; border-color: #00e5ff; }
+
+/* --- CARTES ARTICLES --- */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.shop-card {
+  --rarity: var(--rarity-common);
+  position: relative;
+  display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rarity) 9%, #0a0a0a), #070707 60%);
+  border: 1px solid #1a1a1a; border-top: 3px solid var(--rarity);
+  padding: 16px;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.shop-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--rarity) 50%, #1a1a1a); }
+.shop-card.rare { --rarity: var(--rarity-rare); }
+.shop-card.epic { --rarity: var(--rarity-epic); }
+.shop-card.legendary { --rarity: var(--rarity-legendary); box-shadow: 0 0 22px rgba(255, 215, 0, 0.08); }
+.shop-card.equipped { outline: 1px solid #00d2be; }
+
+.shop-card-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.rarity-text { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 2px; color: var(--rarity-common); }
+.rarity-text.rare { color: var(--rarity-rare); }
+.rarity-text.epic { color: var(--rarity-epic); }
+.rarity-text.legendary { color: var(--rarity-legendary); }
+.shop-card-cat { font-size: 0.6rem; color: #666; letter-spacing: 1px; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+.shop-sport-tag { color: #000; padding: 1px 5px; font-size: 0.55rem; }
+
+.shop-card-visual { height: 110px; display: flex; align-items: center; justify-content: center; }
+.shop-visual-title { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #ffd659; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+.shop-card-name { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; margin: 0; letter-spacing: 0.5px; }
+.shop-card-desc { color: #888; font-size: 0.8rem; margin: 0; flex: 1; }
+
+.shop-card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; border-top: 1px solid #161616; padding-top: 10px; }
+.shop-price { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 0.95rem; }
+.shop-price small { font-size: 0.6rem; color: #666; }
+.shop-owned { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #00d2be; font-weight: 700; letter-spacing: 1px; }
+.shop-btn {
+  background: var(--rarity); color: #000; border: none;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.65rem; letter-spacing: 1px;
+  padding: 8px 12px; cursor: pointer; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+}
+.shop-btn.ghost { background: #1a1a1a; color: #aaa; }
+.shop-btn:disabled { background: #1a1a1a; color: #555; cursor: not-allowed; }
+
+.shop-empty, .shop-muted { color: #666; margin: 0; }
+
+/* --- GESTION DU CATALOGUE (ADMIN) --- */
+.shop-admin { display: flex; flex-direction: column; gap: 12px; }
+.shop-admin-table-wrap { overflow-x: auto; }
+.shop-admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.shop-admin-table th { text-align: left; font-size: 0.6rem; letter-spacing: 2px; color: #666; padding: 8px 10px; border-bottom: 1px solid #222; }
+.shop-admin-table td { padding: 8px 10px; border-bottom: 1px solid #141414; }
+.shop-admin-table .num { text-align: right; }
+.shop-admin-table tr.inactive td { opacity: 0.45; }
+.shop-admin-table tr.inactive td:last-child { opacity: 1; }
+.shop-price-edit { display: inline-flex; gap: 4px; }
+.shop-price-edit input { width: 80px; background: #0d0d0d; border: 1px solid #222; color: #fff; padding: 5px 8px; }
+.shop-price-edit button, .shop-state { background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; font-size: 0.65rem; font-weight: 700; padding: 5px 10px; cursor: pointer; }
+.shop-price-edit button:disabled { opacity: 0.4; cursor: not-allowed; }
+.shop-state.on { color: #00d2be; border-color: #00d2be55; }
+.shop-state.off { color: #ff6b6b; border-color: #ff6b6b55; }
+
+@media (max-width: 768px) {
+  .shop-page { padding: 0 16px 32px; }
+  .shop-title { font-size: 1.6rem; }
+  .shop-preview { min-width: 0; width: 100%; box-sizing: border-box; }
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}

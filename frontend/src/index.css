@@ -1,0 +1,50 @@
+/* Base : reset léger et styles par défaut des éléments HTML */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  font-feature-settings: "cv11", "ss01";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root { min-height: 100vh; }
+
+h1, h2, h3, h4 { margin: 0; line-height: 1.15; font-weight: 700; color: var(--text); }
+p { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--text); }
+
+img, svg { display: block; max-width: 100%; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+button:disabled { cursor: not-allowed; }
+
+/* Contour visible uniquement au clavier */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--sport); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+::selection { background: var(--sport); color: var(--sport-contrast); }
+
+/* Chiffres alignés partout où l'on compare des valeurs (soldes, points, cotes) */
+table, .num, [data-num] { font-variant-numeric: tabular-nums; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

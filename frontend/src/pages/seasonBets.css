@@ -1,0 +1,56 @@
+.season-hint {
+    color: #999;
+    font-size: 0.9rem;
+    margin: -20px 0 35px;
+    max-width: 700px;
+}
+
+.season-select-block { margin: 0; min-width: 180px; }
+.season-select-block .hud-select { margin-bottom: 0; }
+
+.season-panels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.season-panel {
+    background: rgba(10, 10, 10, 0.95);
+    border: 1px solid #333;
+    border-top: 4px solid #e10600;
+}
+
+.season-panel-header {
+    background: #111;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.season-panel-header h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    margin: 0;
+    letter-spacing: 1px;
+}
+.season-pool-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #e10600;
+}
+
+.season-panel-body { padding: 25px; }
+
+.season-odds-preview {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 20px;
+}
+.season-odds-preview strong { color: #fff; font-family: 'Orbitron'; }
+
+@media (max-width: 900px) {
+    .season-panels-grid { grid-template-columns: 1fr; }
+    .hud-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+}

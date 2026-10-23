@@ -1,0 +1,84 @@
+/* Notes de version : liste chronologique des versions + feuille de route. */
+
+.releases { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+
+.release {
+  position: relative;
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-6);
+}
+/* Fil chronologique entre les versions */
+.release::before {
+  content: "";
+  position: absolute;
+  left: 148px;
+  top: var(--sp-6);
+  bottom: 0;
+  width: 1px;
+  margin-left: calc(var(--sp-6) / -2);
+  background: var(--border);
+}
+.release:last-child::before { display: none; }
+.release::after {
+  content: "";
+  position: absolute;
+  left: 148px;
+  top: var(--sp-5);
+  width: 9px;
+  height: 9px;
+  margin-left: calc(var(--sp-6) / -2 - 4px);
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 2px solid var(--border-strong);
+}
+.release:first-child::after { background: var(--sport); border-color: var(--sport-soft); box-shadow: 0 0 0 4px var(--sport-soft); }
+
+.release-meta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); padding-top: var(--sp-4); }
+.release-version { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.release-date { font-size: var(--fs-sm); color: var(--text-3); }
+.release-meta .badge { margin-top: var(--sp-2); }
+
+.release-card { gap: var(--sp-5); }
+.release-head { display: flex; flex-direction: column; gap: var(--sp-2); }
+.release-title { font-size: var(--fs-lg); font-weight: 600; }
+.release-summary { color: var(--text-2); font-size: var(--fs-sm); max-width: 72ch; }
+
+.changes { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.change {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+.change:first-child { border-top: 0; padding-top: 0; }
+.change:last-child { padding-bottom: 0; }
+.change-kind { justify-content: center; }
+.change-text { color: var(--text-2); line-height: 1.55; }
+
+.roadmap-note { font-size: var(--fs-sm); }
+.roadmap-card { gap: var(--sp-3); }
+.roadmap-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.roadmap-icon {
+  display: grid; place-items: center; width: 36px; height: 36px;
+  border-radius: var(--radius-md); background: var(--surface-3); border: 1px solid var(--border-strong); color: var(--text);
+}
+.roadmap-title { font-size: var(--fs-md); font-weight: 600; }
+.roadmap-text { color: var(--text-2); font-size: var(--fs-sm); }
+
+@media (max-width: 760px) {
+  .release { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+  .release::before, .release::after { display: none; }
+  .release-meta { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); padding-top: 0; }
+  .release-version { font-size: var(--fs-xl); }
+  .release-meta .badge { margin-top: 0; }
+}
+
+@media (max-width: 480px) {
+  .change { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .change-kind { justify-self: start; }
+}

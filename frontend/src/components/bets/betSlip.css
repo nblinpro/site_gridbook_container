@@ -1,0 +1,68 @@
+/* Éléments communs aux bulletins de pari (course et saison) */
+
+/* --- Sélection d'un participant --- */
+.picker { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.picker legend { padding: 0; margin-bottom: var(--sp-2); }
+.picker:disabled { opacity: 0.55; }
+.picker-search { position: relative; display: flex; align-items: center; }
+.picker-search .icon { position: absolute; left: var(--sp-3); color: var(--text-3); pointer-events: none; }
+.picker-search .input { padding-left: 36px; }
+.picker-search .input::-webkit-search-cancel-button { filter: invert(0.7); }
+
+.picker-list {
+  display: flex; flex-direction: column; max-height: 296px; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+}
+.picker-empty { padding: var(--sp-4); font-size: var(--fs-sm); color: var(--text-3); text-align: center; }
+.picker-row {
+  position: relative; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3);
+  min-height: 48px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background var(--dur) var(--ease);
+}
+.picker-row:last-child { border-bottom: 0; }
+.picker-row:hover { background: var(--surface-3); }
+.picker:disabled .picker-row { cursor: not-allowed; }
+.picker-row.is-selected { background: var(--sport-soft); box-shadow: inset 3px 0 0 var(--sport); }
+.picker-radio { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.picker-row:has(.picker-radio:focus-visible) { outline: 2px solid var(--sport); outline-offset: -2px; }
+.picker-check {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid var(--border-strong); color: transparent; transition: background var(--dur), border-color var(--dur);
+}
+.picker-row.is-selected .picker-check { background: var(--sport); border-color: var(--sport); color: var(--sport-contrast); }
+.picker-text { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+.picker-name { font-size: var(--fs-sm); font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker-team { font-size: var(--fs-xs); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker-odds {
+  flex-shrink: 0; min-width: 52px; padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-sm); text-align: center;
+  background: var(--surface-3); color: var(--text); font-size: var(--fs-sm); font-weight: 700;
+}
+.picker-odds.is-empty { color: var(--text-3); font-weight: 500; }
+.picker-row.is-selected .picker-odds { background: var(--sport); color: var(--sport-contrast); }
+
+/* --- Mise --- */
+.amount-input { font-weight: 700; font-size: var(--fs-lg); }
+.amount-input::-webkit-inner-spin-button, .amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.amount-input { -moz-appearance: textfield; appearance: textfield; }
+.amount-input[aria-invalid="true"] { border-color: var(--danger); }
+.amount-chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
+.amount-chip {
+  height: 32px; border-radius: var(--radius-sm); background: var(--surface-3); border: 1px solid var(--border-strong);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.amount-chip:hover:not(:disabled) { color: var(--text); border-color: var(--text-3); }
+.amount-chip:disabled { opacity: 0.4; }
+
+/* --- Récapitulatif --- */
+.slip-summary { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.slip-summary .kv strong { font-variant-numeric: tabular-nums; }
+.slip-summary .divider { margin: var(--sp-1) 0; }
+.slip-total { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); }
+.slip-total-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+.slip-total-value { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--success); font-variant-numeric: tabular-nums; }
+.slip-total-value small { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--text-3); margin-left: 4px; }
+.slip-rule { display: flex; gap: var(--sp-2); align-items: flex-start; font-size: var(--fs-xs); color: var(--text-3); }
+.slip-rule .icon { flex-shrink: 0; margin-top: 1px; }
+
+.btn-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: slip-spin 0.7s linear infinite; }
+@keyframes slip-spin { to { transform: rotate(360deg); } }

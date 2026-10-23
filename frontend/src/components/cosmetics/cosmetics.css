@@ -1,0 +1,39 @@
+.ua {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #111;
+  border: 2px solid var(--ua-frame);
+  color: #fff;
+  font-weight: 900;
+  line-height: 1;
+}
+.ua-glow { box-shadow: 0 0 15px color-mix(in srgb, var(--ua-frame) 70%, transparent); }
+.ua-face { user-select: none; }
+.ua-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  background: #0b0b0b;
+  border: 1px solid #333;
+  border-radius: 50%;
+  padding: 2px;
+  line-height: 1;
+}
+/* Cadre légendaire : reflet qui tourne autour de l'avatar */
+.ua-legendary { border-color: transparent; background: linear-gradient(#111, #111) padding-box, conic-gradient(from var(--ua-angle, 0deg), var(--ua-frame), #fff8, var(--ua-frame), #7a5c00, var(--ua-frame)) border-box; animation: ua-spin 4s linear infinite; }
+@property --ua-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes ua-spin { to { --ua-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .ua-legendary { animation: none; } }
+
+.ua-title {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  color: var(--ua-title-color, #ffd659);
+  text-transform: uppercase;
+}
