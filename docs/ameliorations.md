@@ -97,6 +97,8 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
   widget simulé a été retiré pour cette raison).
 - **Résultats complets** (M) : la page de résultats détaillée n'existe que pour la F1. La
   généraliser à MotoGP et NASCAR (classement complet, écarts, abandons).
+- **Palmarès des saisons précédentes** (M) : une rubrique « Palmarès » par championnat avec le
+  classement final pilotes et équipes de chaque année passée. Détail au § 3.1.
 - **Fiches pilotes et écuries** (M) : photo, nationalité, statistiques de la saison, forme
   récente, historique des paris de la communauté sur le pilote.
 - **Images des circuits NASCAR en local** (S) : nascar.com bloque les images (protection
@@ -106,6 +108,34 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
 - **Nouveaux championnats** (L) : WEC, IndyCar, Formula E et WorldSBK ont été écartés faute
   d'API gratuite (voir README). Possibles avec une API payante (Sportradar) ou une saisie
   manuelle par l'admin.
+
+### 3.1 Palmarès des saisons précédentes
+
+Une rubrique « Palmarès » dans la sous-navigation de chaque championnat, avec un sélecteur
+d'année : classement final des pilotes et des équipes, champion mis en avant (podium), nombre de
+victoires et écart au champion. Elle donne du contexte aux paris de saison (« qui gagne
+d'habitude ? ») et à la future fiche pilote.
+
+**Données disponibles** (vérifié avec les adaptateurs actuels) :
+
+| Championnat | Années disponibles | Remarque |
+|---|---|---|
+| F1 | depuis 1950 | classement constructeurs seulement depuis 1958, année de sa création |
+| MotoGP | vérifié depuis 2010 | pour 2002 l'adaptateur échoue : à corriger pour remonter plus loin |
+| NASCAR | depuis 2016 | les années plus anciennes ne sont pas publiées par la source |
+
+**Ce que ça demande**
+
+| Partie | Changement |
+|---|---|
+| API | rien à créer : `GET /standings/{championnat}?year=AAAA` accepte déjà une année. Ajouter `GET /standings/{championnat}/years` (années disponibles) |
+| Cache | une saison terminée ne change plus : la garder en cache longtemps (aujourd'hui 10 minutes), ou l'enregistrer en base pour ne plus interroger la source |
+| Interface | page `/{championnat}/palmares` : sélecteur d'année, podium du champion, tableaux pilotes et équipes (réutiliser `SportStandings`) |
+| Navigation | lien « Palmarès » dans la sous-navigation du championnat |
+| Tests | une année passée par championnat dans `e2e/run.mjs` (ex. F1 1990 : Ayrton Senna champion) |
+
+Extension possible : une page « Champions » par championnat qui liste le champion de chaque année
+(tableau d'honneur), et le nombre de titres par pilote.
 
 ## 4. Expérience utilisateur
 
@@ -165,7 +195,7 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
 | Étape | Contenu |
 |---|---|
 | Sprint 1 | clôture automatique des saisons, session longue, intégration continue, performance de « Mes paris », ménage |
-| Sprint 2 | page profil publique, classement par bénéfice |
+| Sprint 2 | page profil publique, classement par bénéfice, palmarès des saisons précédentes |
 | Sprint 3 | ligues privées, discussion par course, notifications par e-mail, environnement de recette |
 | Sprint 4 | cotes GridBook (étapes 1 à 3 de `cotes-et-bonus.md`), nouveaux marchés |
 | Ensuite | bonus outsider, suivi en direct F1, boutique enrichie (`boutique-contenu.md`), PWA, version anglaise |
