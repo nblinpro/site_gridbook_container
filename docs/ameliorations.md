@@ -1,11 +1,12 @@
 # Améliorations possibles du site
 
 Liste d'idées pour faire progresser GridBook, classées par thème puis par priorité.
-Chaque idée part de l'état actuel du code (octobre 2026, version 2.0.0).
+Chaque idée part de l'état actuel du code (octobre 2026, version 2.1.0) ; seules les idées
+encore à réaliser figurent ici.
 
 Légende de l'effort : **S** quelques heures · **M** 1 à 3 jours · **L** une semaine ou plus.
 
-## Les 10 priorités
+## Les 9 priorités
 
 | # | Amélioration | Pourquoi | Effort |
 |---|---|---|---|
@@ -15,10 +16,9 @@ Légende de l'effort : **S** quelques heures · **M** 1 à 3 jours · **L** une 
 | 4 | Cotes GridBook et bonus outsider | rend les cotes crédibles même avec peu de joueurs (voir `cotes-et-bonus.md`) | L |
 | 5 | Ligues privées entre amis | la principale raison de revenir sur un jeu de pronostics | M |
 | 6 | Notifications de résultats | le joueur ne sait pas qu'il a gagné tant qu'il ne revient pas sur le site | M |
-| 7 | Succès et récompenses à gagner | engagement gratuit, donne de la valeur à la boutique (voir `boutique-contenu.md`) | M |
-| 8 | Nouveaux types de paris (podium, pole, duel) | une seule question par course (« qui gagne ? »), c'est vite répétitif | M |
-| 9 | Intégration continue (lint + E2E à chaque push) | les 32 tests E2E existent mais ne tournent qu'à la main | S |
-| 10 | Environnement de recette | le site n'existe qu'en local ; impossible de le montrer ou de tester en conditions réelles | M |
+| 7 | Nouveaux types de paris (podium, pole, duel) | une seule question par course (« qui gagne ? »), c'est vite répétitif | M |
+| 8 | Intégration continue (lint + E2E à chaque push) | les 36 tests E2E existent mais ne tournent qu'à la main | S |
+| 9 | Environnement de recette | le site n'existe qu'en local ; impossible de le montrer ou de tester en conditions réelles | M |
 
 ## 1. Jeu et pronostics
 
@@ -128,10 +128,12 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
 
 - **Tableau de bord économique** (M) : APEX en circulation, APEX créés (gains, crédits admin) et
   détruits (mises perdues, boutique) par semaine, joueurs actifs, paris par championnat.
+  Aujourd'hui, seul le total des APEX dépensés en boutique est visible (gestion de la boutique).
 - **Journal d'activité admin** (S) : qui a validé quel résultat, crédité quel compte, retiré quel
   article. Les ajustements de solde sont déjà tracés, pas les autres actions.
 - **Création d'articles depuis l'interface** (S) : aujourd'hui le catalogue vient de
-  `app/seed.py` ; l'admin ne peut que changer les prix et retirer des articles.
+  `app/services/shop_catalog.py` ; l'admin peut seulement changer les prix, mettre un article à
+  la une et le retirer de la vente. Même chose pour les collections.
 - **Annonces** (S) : bandeau d'information sur le site (maintenance, nouvelle collection).
 
 ## 6. Qualité, sécurité et exploitation
@@ -147,10 +149,10 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
 - **Limitation de débit partagée** (S) : le limiteur est en mémoire, pour un seul processus. En
   production avec plusieurs instances, le passer sur Redis.
 - **Environnement de recette** (M) : serveur et nom de domaine dédiés, HTTPS
-  (`COOKIE_SECURE=true`), ports 3308 et 8001 fermés, SMTP configuré, déploiement depuis une
-  branche Git (le README détaille les étapes).
-- **Sauvegardes de la base** (S) : `mysqldump` quotidien vers un stockage externe, avec un test
-  de restauration.
+  (`COOKIE_SECURE=true` et en-tête HSTS, déjà préparé en commentaire dans `nginx.conf`), SMTP
+  configuré, déploiement depuis une branche Git (le README détaille les étapes).
+- **Sauvegardes de la base** (S) : `mysqldump` quotidien et automatique vers un stockage externe,
+  avec un test de restauration (une seule sauvegarde manuelle existe, dans `backups/`).
 - **Suivi des erreurs** (S) : Sentry ou équivalent sur le frontend et le backend, pour voir les
   erreurs que les joueurs rencontrent.
 - **Dépôt distant** (S) : `Gridbook_new` est sous Git en local seulement. Le pousser sur GitHub,
@@ -163,7 +165,7 @@ même temps), le signalement puis la suppression par l'admin, et l'accès refus�
 | Étape | Contenu |
 |---|---|
 | Sprint 1 | clôture automatique des saisons, session longue, intégration continue, performance de « Mes paris », ménage |
-| Sprint 2 | page profil publique, classement par bénéfice, succès et récompenses |
+| Sprint 2 | page profil publique, classement par bénéfice |
 | Sprint 3 | ligues privées, discussion par course, notifications par e-mail, environnement de recette |
 | Sprint 4 | cotes GridBook (étapes 1 à 3 de `cotes-et-bonus.md`), nouveaux marchés |
 | Ensuite | bonus outsider, suivi en direct F1, boutique enrichie (`boutique-contenu.md`), PWA, version anglaise |
