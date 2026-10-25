@@ -1,5 +1,6 @@
 import logging
 
+from app.utils.validation import checked_amount
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -83,8 +84,7 @@ def place_bet(
         raise HTTPException(status_code=400, detail="La course a déjà commencé !")
 
     # 4. Vérification du montant
-    if amount <= 0:
-        raise HTTPException(status_code=400, detail="Le montant doit être positif")
+    amount = checked_amount(amount)
 
     # 5. Le pilote doit exister et courir dans la même discipline que l'épreuve
     season = db.query(Season).filter(Season.id == race.season_id).first()
@@ -168,8 +168,7 @@ def place_season_bet(
     if bet_type not in SEASON_BET_TYPES:
         raise HTTPException(status_code=400, detail="Type de pari invalide")
 
-    if amount <= 0:
-        raise HTTPException(status_code=400, detail="Le montant doit être positif")
+    amount = checked_amount(amount)
 
     season = db.query(Season).filter(Season.id == season_id).first()
     if not season:

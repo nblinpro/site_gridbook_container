@@ -27,3 +27,4 @@ node_modules/
 frontend/dist/
 e2e/screenshots/
 e2e/node_modules/
+backups/

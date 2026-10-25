@@ -2,7 +2,8 @@ name: gridbook_new
 
 services:
   db:
-    image: mysql:8.0
+    # MySQL 8.4 LTS : la branche 8.0 est en fin de vie (avril 2026), sans correctifs de sécurité
+    image: mysql:8.4
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -18,8 +19,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    # Base joignable depuis la machine hôte uniquement (TablePlus : tunnel SSH vers 127.0.0.1:3308).
+    # DB_BIND=0.0.0.0 pour l'ouvrir au réseau, déconseillé.
     ports:
-      - "${DB_EXPOSED_PORT:-3308}:3306"
+      - "${DB_BIND:-127.0.0.1}:${DB_EXPOSED_PORT:-3308}:3306"
+    security_opt:
+      - no-new-privileges:true
 
   backend:
     build:
@@ -43,13 +48,23 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SYNC_INTERVAL_HOURS: ${SYNC_INTERVAL_HOURS:-6}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-}
+    # Le navigateur passe par nginx (/api) : le port direct du backend ne sert qu'au débogage
+    # sur la machine hôte, et ne doit pas être ouvert au réseau (voir --proxy-headers).
     ports:
-      - "${BACKEND_PORT:-8001}:8000"
+      - "${BACKEND_BIND:-127.0.0.1}:${BACKEND_PORT:-8001}:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
   frontend:
     build:
@@ -62,8 +77,16 @@ services:
       - backend
     volumes:
       - ./docker/frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/frontend/proxy-api.inc:/etc/nginx/conf.d/proxy-api.inc:ro
     ports:
       - "${FRONTEND_PORT:-5174}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   db_data:

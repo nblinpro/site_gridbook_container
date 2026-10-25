@@ -65,6 +65,27 @@ await step('Inscription → accueil des championnats (3 cartes)', async () => {
   await noOverflow();
 });
 
+await step('Sécurité : montants invalides refusés (NaN, Infinity, négatif, énorme)', async () => {
+  const race = (await (await page.request.get(`${API}/races/?discipline=f1`)).json()).find(r => r.is_open);
+  const driver = (await (await page.request.get(`${API}/drivers/?discipline=f1`)).json())[0];
+  for (const amount of ['NaN', 'Infinity', '-5', '0', '5000000']) {
+    const r = await page.request.post(`${API}/bets/place`, { headers: { 'Content-Type': 'application/json' }, data: `{"race_id":${race.id},"selection_id":${driver.id},"amount":${amount}}` });
+    if (![400, 422].includes(r.status())) throw new Error(`montant ${amount} : refus attendu, obtenu ${r.status()}`);
+  }
+  eq(await wallet(), 10000, 'solde inchangé');
+});
+
+await step('Sécurité : en-têtes, documentation API fermée, erreurs sans valeur saisie', async () => {
+  const res = await page.request.get(`${BASE}/`);
+  for (const h of ['content-security-policy', 'x-frame-options', 'x-content-type-options', 'referrer-policy']) {
+    if (!res.headers()[h]) throw new Error(`en-tête ${h} absent`);
+  }
+  eq((await page.request.get(`${API}/docs`)).status(), 404, '/docs');
+  const bad = await page.request.post(`${API}/auth/login`, { data: { email: 'a@b.fr', password: 'x'.repeat(500) } });
+  eq(bad.status(), 422, 'mot de passe trop long');
+  if ((await bad.text()).includes('xxxx')) throw new Error('la valeur saisie est renvoyée dans l\'erreur');
+});
+
 for (const s of SPORTS) {
   await step(`${s.name} : accueil, championnat actif dans la barre`, async () => {
     await page.goto(BASE + s.base);

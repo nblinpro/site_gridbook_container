@@ -18,11 +18,17 @@ class RateLimiter:
         self._lock = threading.Lock()
 
     def __call__(self, request: Request):
+        # Derrière nginx, uvicorn (--proxy-headers) remplace l'adresse du conteneur nginx par
+        # celle du visiteur, que nginx transmet dans X-Forwarded-For sans garder la valeur
+        # envoyée par le client : un visiteur ne peut ni la falsifier ni bloquer les autres.
         client_ip = request.client.host if request.client else "unknown"
         now = time.monotonic()
         cutoff = now - self.window_seconds
 
         with self._lock:
+            # Ménage périodique : sans lui, chaque adresse vue resterait en mémoire indéfiniment
+            if len(self._hits) > 10_000:
+                self._hits = {ip: ts for ip, ts in self._hits.items() if ts and ts[-1] > cutoff}
             hits = [t for t in self._hits.get(client_ip, []) if t > cutoff]
             if len(hits) >= self.max_calls:
                 raise HTTPException(status_code=429, detail="Trop de tentatives, réessaie plus tard")

@@ -7,6 +7,7 @@ from app.models.shop import Product, Purchase
 from app.models.token_transaction import TokenTransaction
 from app.models.user import User
 from app.services.cosmetics import equipped_cosmetics
+from app.utils.validation import MAX_AMOUNT
 from app.utils.dependencies import get_current_admin, get_current_user, get_db
 
 router = APIRouter(prefix="/shop", tags=["Boutique"])
@@ -117,8 +118,8 @@ def admin_update_product(
     if not product:
         raise HTTPException(status_code=404, detail="Article introuvable")
     if price is not None:
-        if price <= 0:
-            raise HTTPException(status_code=400, detail="Le prix doit être positif")
+        if price <= 0 or price > MAX_AMOUNT:
+            raise HTTPException(status_code=400, detail="Prix invalide")
         product.price = price
     if is_active is not None:
         product.is_active = is_active

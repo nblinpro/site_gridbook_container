@@ -1,5 +1,7 @@
 import bcrypt
 import requests
+from app.utils.validation import checked_amount
+from app.schemas.auth_schemas import NewPassword, Username
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
@@ -14,9 +16,9 @@ SEASON_BET_TYPES = ("season_driver", "season_team")
 
 
 class AdminCreateUserRequest(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
+    username: Username
     email: EmailStr
-    password: str = Field(..., min_length=8)
+    password: NewPassword
     role: str = Field("user", pattern="^(user|admin)$")
 
 # --- GESTION DES COURSES (RÉSULTATS & CLÔTURE) ---
@@ -213,8 +215,7 @@ def adjust_wallet(
     admin: User = Depends(get_current_admin),
 ):
     """Crédite (amount > 0) ou débite (amount < 0) manuellement le solde d'un compte, avec traçabilité."""
-    if amount == 0:
-        raise HTTPException(status_code=400, detail="Le montant ne peut pas être nul")
+    amount = checked_amount(amount, allow_negative=True)
 
     user = db.query(User).filter(User.id == user_id).with_for_update().first()
     if not user:

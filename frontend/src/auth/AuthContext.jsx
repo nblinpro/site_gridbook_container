@@ -16,11 +16,13 @@ export const AuthProvider = ({ children }) => {
       const res = await apiClient.get("/auth/me");
       setUser(res.data);
     } catch (error) {
-      // 401 = pas de session valide (cookie absent/expiré), pas une erreur à logger
-      if (error.response?.status !== 401) {
+      // Seul un 401 signifie « pas de session valide ». Une erreur passagère (limite de débit,
+      // réseau, serveur redémarré) ne doit pas déconnecter un joueur déjà connecté.
+      if (error.response?.status === 401) {
+        setUser(null);
+      } else {
         console.error("Auth Error:", error);
       }
-      setUser(null);
     } finally {
       setLoading(false);
     }
