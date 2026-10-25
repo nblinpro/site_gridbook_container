@@ -66,4 +66,16 @@ def seed() -> None:
                 is_active=True,
             ))
             logger.info("Compte admin initial créé : %s", email)
+        # Compte joueur de test (rôle « user ») : voir le site comme un joueur sans droits admin
+        test_email = os.getenv("TEST_USER_EMAIL")
+        test_password = os.getenv("TEST_USER_PASSWORD")
+        if test_email and test_password and not db.query(User).filter(User.email == test_email).first():
+            db.add(User(
+                username=os.getenv("TEST_USER_USERNAME", "joueur"),
+                email=test_email,
+                password_hash=bcrypt.hashpw(test_password.encode("utf-8")[:72], bcrypt.gensalt()).decode("utf-8"),
+                role="user",
+                is_active=True,
+            ))
+            logger.info("Compte joueur de test créé : %s", test_email)
         db.commit()

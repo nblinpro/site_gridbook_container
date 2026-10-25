@@ -27,7 +27,7 @@ await page.fill('input[type=email]', ENV.ADMIN_EMAIL);
 await page.fill('input[type=password]', ENV.ADMIN_PASSWORD);
 await page.click('button[type=submit]');
 await page.waitForURL(u => !u.pathname.includes('login'));
-const pages = (process.env.PAGES || '/sports,/dashboard,/f1/calendar,/f1/2026/race/1,/f1/2025/race/1/results,/f1/standings,/season-bets,/f1/history,/place-bet/3,/motogp,/motogp/calendar,/motogp/standings,/place-bet/41,/nascar,/place-bet/80,/leaderboard,/PatchNotes,/admin,/admin/accounts,/shop').split(',');
+const pages = (process.env.PAGES || '/sports,/f1,/f1/calendar,/f1/2026/race/1,/f1/2025/race/1/results,/f1/standings,/f1/season-bets,/f1/history,/place-bet/3,/motogp,/motogp/calendar,/motogp/standings,/place-bet/41,/nascar,/place-bet/80,/leaderboard,/PatchNotes,/admin,/admin/accounts,/shop').split(',');
 for (const path of pages) await shot(path);
 console.log(overflow.length ? `Débordement horizontal : ${overflow.join(', ')}` : 'Aucun débordement horizontal');
 console.log(errors.length ? `Erreurs JS : ${errors.join(' | ')}` : 'Aucune erreur JS');

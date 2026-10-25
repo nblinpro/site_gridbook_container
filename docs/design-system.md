@@ -79,8 +79,12 @@ Chaque page préfixe ses classes (`pb-` page de pari, `sb-` paris de saison, `bh
 
 - Sur les pages `/admin*`, la sous-navigation devient celle de l'administration et le panneau
   disparaît.
-- Sur les pages hors championnat (boutique, classement général, notes de version), aucun
-  championnat n'est « actif » dans la barre.
+- Sur les pages communes (accueil `/sports`, boutique, classement général, « Mes paris » tous
+  championnats, notes de version), aucun championnat n'est « actif » : la sous-navigation devient
+  celle de GridBook (Accueil → `/sports`) et la page prend la couleur de la marque.
+- Chaque championnat a ses adresses sous son préfixe : `/f1`, `/motogp`, `/nascar`
+  (+ `/calendar`, `/standings`, `/season-bets`, `/history`). `/dashboard` et `/season-bets`
+  redirigent vers `/f1` et `/f1/season-bets`.
 - `<Layout rail={false}>` retire le panneau pour les pages larges (boutique, page de pari, admin).
 - Sous 1100 px, les liens de la barre passent dans un tiroir (bouton ☰). Sous 760 px, le
   sélecteur de championnat passe sur sa propre ligne.
@@ -174,12 +178,12 @@ avec un commentaire.
 |---|---|
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | `pages/login/`, `pages/register/` (hors Layout, écran partagé) |
 | `/sports` | `pages/SportsHome.jsx` |
-| `/dashboard`, `/motogp`, `/nascar` | `pages/sport/SportDashboard.jsx` |
+| `/f1`, `/motogp`, `/nascar` | `pages/sport/SportDashboard.jsx` |
 | `/f1/calendar`, `/motogp/calendar`, `/nascar/calendar` | `pages/sport/SportCalendar.jsx` |
 | `/…/standings` | `pages/sport/SportStandings.jsx` |
 | `/f1/:season/race/:round`, `…/results` | `pages/f1/RaceDetails.jsx`, `RaceResults.jsx` |
 | `/place-bet/:raceId` | `pages/PlaceBet.jsx` |
-| `/season-bets`, `/motogp/season-bets`, `/nascar/season-bets` | `pages/SeasonBets.jsx` |
+| `/f1/season-bets`, `/motogp/season-bets`, `/nascar/season-bets` | `pages/SeasonBets.jsx` |
 | `/f1/history`, `/…/history`, `/bet-history` | `pages/BetHistory.jsx` |
 | `/leaderboard` | `pages/Leaderboard.jsx` |
 | `/shop` | `pages/shop/Shop.jsx` (+ `ShopParts.jsx`, `shopUtils.js`) |

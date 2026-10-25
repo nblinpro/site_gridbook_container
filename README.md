@@ -126,7 +126,7 @@ arrière-plan (quelques secondes).
 
 | Service | Adresse |
 |---|---|
-| Site | http://localhost:5174 (connexion avec `ADMIN_EMAIL` / `ADMIN_PASSWORD`) |
+| Site | http://localhost:5174 : compte admin `ADMIN_EMAIL` / `ADMIN_PASSWORD`, compte joueur de test `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` (sans droits admin) |
 | API | http://localhost:5174/api (ou http://localhost:8001 depuis la machine hôte) ; documentation `/docs` si `ENABLE_API_DOCS=true` |
 | MySQL | `127.0.0.1:3308`, base `DB_NAME`, utilisateur `DB_USER` |
 

@@ -88,7 +88,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (authLoading) return;
     if (!userId) { navigate("/login"); return; }
-    if (!isAdmin) { navigate("/dashboard"); return; }
+    if (!isAdmin) { navigate("/sports"); return; }
     void fetchUsers();
     void fetchSportData();
   }, [authLoading, userId, isAdmin, navigate, fetchUsers, fetchSportData]);

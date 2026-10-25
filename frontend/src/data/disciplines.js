@@ -12,13 +12,13 @@ export const DISCIPLINES = [
     contrast: "#ffffff", // texte posé sur la couleur du sport (contraste AA)
     source: "Jolpica (Ergast) · OpenF1",
     routes: {
-      dashboard: "/dashboard",
+      dashboard: "/f1",
       calendar: "/f1/calendar",
       standings: "/f1/standings",
-      seasonBets: "/season-bets",
+      seasonBets: "/f1/season-bets",
       history: "/f1/history",
     },
-    matchPrefixes: ["/dashboard", "/f1", "/season-bets"],
+    matchPrefixes: ["/f1"],
     labels: {
       event: "Grand Prix", events: "Grands Prix",
       participant: "Pilote", participants: "Pilotes",

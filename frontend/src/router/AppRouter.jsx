@@ -26,7 +26,7 @@ function PrivateRoute({ children, adminOnly }) {
   const { user, loading } = useAuth();
   if (loading) return <F1LightsLoader label="VÉRIFICATION..." />;
   if (!user) return <Navigate to="/login" />;
-  if (adminOnly && user.role !== "admin") return <Navigate to="/dashboard" />;
+  if (adminOnly && user.role !== "admin") return <Navigate to="/sports" replace />;
   return children;
 }
 
@@ -73,6 +73,10 @@ export default function AppRouter() {
 
           <Route path="/admin" element={<PrivateRoute adminOnly={true}><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/accounts" element={<PrivateRoute adminOnly={true}><AdminAccounts /></PrivateRoute>} />
+
+          {/* Anciennes adresses de la F1 (avant l'alignement sur /motogp et /nascar) */}
+          <Route path="/dashboard" element={<Navigate to="/f1" replace />} />
+          <Route path="/season-bets" element={<Navigate to="/f1/season-bets" replace />} />
 
           <Route path="*" element={<Navigate to={user ? "/sports" : "/login"} replace />} />
         </Routes>

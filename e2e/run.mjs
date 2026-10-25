@@ -17,7 +17,7 @@ const U = { username: `e2e_${ts % 100000}`, email: `e2e_${ts}@test.fr`, password
 const U2 = { username: `e2eadm_${ts % 100000}`, email: `e2eadm_${ts}@test.fr`, password: 'adminpass123' };
 
 const SPORTS = [
-  { slug: 'f1', name: 'Formule 1', short: 'F1', base: '/dashboard', cal: '/f1/calendar', standings: '/f1/standings', season: '/season-bets', history: '/f1/history', knownDriver: 'Antonelli' },
+  { slug: 'f1', name: 'Formule 1', short: 'F1', base: '/f1', cal: '/f1/calendar', standings: '/f1/standings', season: '/f1/season-bets', history: '/f1/history', knownDriver: 'Antonelli' },
   { slug: 'motogp', name: 'MotoGP', short: 'MotoGP', base: '/motogp', cal: '/motogp/calendar', standings: '/motogp/standings', season: '/motogp/season-bets', history: '/motogp/history', knownDriver: 'Martin' },
   { slug: 'nascar', name: 'NASCAR Cup', short: 'NASCAR', base: '/nascar', cal: '/nascar/calendar', standings: '/nascar/standings', season: '/nascar/season-bets', history: '/nascar/history', knownDriver: 'Larson' },
 ];

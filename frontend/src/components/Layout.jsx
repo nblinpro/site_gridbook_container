@@ -27,6 +27,17 @@ function sportNav(d) {
   ];
 }
 
+// Pages communes à tous les championnats : leur propre navigation, « Accueil » ramène au choix du sport
+const GLOBAL_NAV = [
+  { to: "/sports", label: "Accueil", icon: "home", end: true },
+  { to: "/leaderboard", label: "Classement général", icon: "chart" },
+  { to: "/shop", label: "Boutique", icon: "cart" },
+  { to: "/bet-history", label: "Mes paris", icon: "ticket" },
+  { to: "/PatchNotes", label: "Notes de version", icon: "file" },
+];
+
+const BRAND = { accent: "var(--brand)", contrast: "var(--text-on-brand)" };
+
 const ADMIN_NAV = [
   { to: "/admin", label: "Direction de course", icon: "shield", end: true },
   { to: "/admin/accounts", label: "Comptes & crédits", icon: "users" },
@@ -116,11 +127,15 @@ export default function Layout({ children, rail = true }) {
 
   const pending = bets.filter((b) => b.status === "pending");
   const staked = pending.reduce((sum, b) => sum + Number(b.amount || 0), 0);
-  const subnav = isAdminPage ? ADMIN_NAV : sportNav(discipline);
+  const subnav = isAdminPage ? ADMIN_NAV : isGlobalPage ? GLOBAL_NAV : sportNav(discipline);
+  // Couleur de la page : celle du championnat, ou celle de la marque sur les pages communes
+  const theme = isGlobalPage ? BRAND : discipline;
+  const historyPath = isGlobalPage ? "/bet-history" : discipline.routes.history;
+  const racesPath = isGlobalPage ? "/sports" : discipline.routes.calendar;
   const showRail = rail && !isAdminPage;
 
   return (
-    <div className="app" style={{ "--sport": discipline.accent, "--sport-contrast": discipline.contrast }}>
+    <div className="app" style={{ "--sport": theme.accent, "--sport-contrast": theme.contrast }}>
       <a className="skip-link" href="#contenu">Aller au contenu</a>
 
       <header className="topbar">
@@ -155,7 +170,7 @@ export default function Layout({ children, rail = true }) {
               {isAdmin && <NavLink to="/admin" className="topbar-link"><Icon name="shield" size={16} />Admin</NavLink>}
             </nav>
 
-            <Link to={discipline.routes.history} className="wallet-pill" title="Ton solde d'APEX">
+            <Link to={historyPath} className="wallet-pill" title="Ton solde d'APEX">
               <Icon name="wallet" size={16} />
               <span className="num">{fmt(user?.wallet)}</span>
               <span className="wallet-unit">APEX</span>
@@ -175,7 +190,7 @@ export default function Layout({ children, rail = true }) {
                       {user?.cosmetics?.title ? <span className="ua-title">{user.cosmetics.title}</span> : <span className="muted">{isAdmin ? "Administrateur" : "Parieur"}</span>}
                     </div>
                   </div>
-                  <Link role="menuitem" to={discipline.routes.history} className="user-menu-item"><Icon name="ticket" size={16} />Mes paris</Link>
+                  <Link role="menuitem" to={historyPath} className="user-menu-item"><Icon name="ticket" size={16} />Mes paris</Link>
                   <Link role="menuitem" to="/shop" className="user-menu-item"><Icon name="bag" size={16} />Boutique & inventaire</Link>
                   <Link role="menuitem" to="/PatchNotes" className="user-menu-item"><Icon name="file" size={16} />Notes de version</Link>
                   <div className="divider" />
@@ -190,9 +205,9 @@ export default function Layout({ children, rail = true }) {
           </div>
         </div>
 
-        <nav className="subnav" aria-label={isAdminPage ? "Administration" : `Navigation ${discipline.name}`}>
+        <nav className="subnav" aria-label={isAdminPage ? "Administration" : isGlobalPage ? "Navigation GridBook" : `Navigation ${discipline.name}`}>
           <div className="subnav-inner">
-            {!isAdminPage && <span className="subnav-sport">{discipline.name}</span>}
+            {!isAdminPage && <span className="subnav-sport">{isGlobalPage ? "GridBook" : discipline.name}</span>}
             {subnav.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end} className="subnav-link">
                 <Icon name={item.icon} size={16} />
@@ -247,7 +262,7 @@ export default function Layout({ children, rail = true }) {
                 {pending.length === 0 && (
                   <li className="rail-empty">
                     Aucun pari en cours.
-                    <Link to={discipline.routes.calendar} className="btn-link">Voir les prochaines courses <Icon name="arrowRight" size={14} /></Link>
+                    <Link to={racesPath} className="btn-link">Voir les prochaines courses <Icon name="arrowRight" size={14} /></Link>
                   </li>
                 )}
                 {pending.slice(0, 6).map((bet) => {
@@ -268,7 +283,7 @@ export default function Layout({ children, rail = true }) {
                   );
                 })}
               </ul>
-              <Link to={discipline.routes.history} className="rail-footer">Tout l'historique <Icon name="chevronRight" size={14} /></Link>
+              <Link to={historyPath} className="rail-footer">Tout l'historique <Icon name="chevronRight" size={14} /></Link>
             </div>
             <p className="rail-note">Jeu de pronostics sans argent réel : les APEX n'ont aucune valeur monétaire.</p>
           </aside>
