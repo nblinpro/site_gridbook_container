@@ -162,6 +162,8 @@ await step('Annulation du pari F1 depuis l\'historique → mise recréditée', a
 
 await step('Boutique : achat + équipement d\'un avatar et d\'un titre', async () => {
   await page.goto(`${BASE}/shop`);
+  await page.locator('.shop-hero').first().waitFor();
+  await page.locator('.shop-views .tab', { hasText: 'Catalogue' }).click();
   for (const [name, price] of [['Monoplace', 500], ['Chef de stand', 700]]) {
     const before = await wallet();
     const card = page.locator('.shop-card', { hasText: name });
@@ -181,11 +183,37 @@ await step('Boutique : achat + équipement d\'un avatar et d\'un titre', async (
 });
 
 await step('Boutique : article trop cher bloqué, inventaire, rachat refusé', async () => {
-  eq(await page.locator('.shop-card', { hasText: 'Couronne' }).locator('button').isDisabled(), true, 'Couronne désactivée');
+  eq(await page.locator('.shop-card', { hasText: 'Couronne' }).locator('.shop-buy').isDisabled(), true, 'Couronne désactivée');
   await page.locator('.shop-views .tab', { hasText: 'Mon inventaire' }).click();
   eq(await page.locator('.shop-card').count(), 2, 'articles en inventaire');
   const products = await (await page.request.get(`${API}/shop/products`)).json();
   eq((await page.request.post(`${API}/shop/buy/${products.find(p => p.slug === 'av_f1').id}`)).status(), 400, 'rachat');
+});
+
+let collectionCost = 0;
+await step('Boutique : collection achetée en lot avec la remise', async () => {
+  const cols = await (await page.request.get(`${API}/shop/collections`)).json();
+  const col = cols.find(c => c.slug === 'genou_a_terre');
+  collectionCost = col.bundle_price;
+  if (!(collectionCost < col.remaining_price)) throw new Error('pas de remise appliquée');
+  const before = await wallet();
+  await page.locator('.shop-views .tab', { hasText: 'Collections' }).click();
+  const block = page.locator('.shop-collection', { hasText: 'Genou à terre' });
+  await block.locator('button', { hasText: 'Tout acheter' }).click();
+  await page.locator('.confirm-box .btn-primary').click();
+  await toast('success', 'Genou à terre');
+  eq(await wallet(), before - collectionCost, 'solde après la collection');
+  await block.locator('.badge', { hasText: 'Complète' }).waitFor();
+});
+
+await step('Récompense gagnée en jouant : « Premier départ » récupérée', async () => {
+  await page.locator('.shop-views .tab', { hasText: 'Récompenses' }).click();
+  const card = page.locator('.shop-reward', { hasText: 'Premier départ' });
+  await card.locator('button', { hasText: 'Récupérer' }).click();
+  await toast('success', 'Récompense obtenue');
+  await card.locator('button', { hasText: 'Équiper' }).waitFor();
+  const locked = page.locator('.shop-reward', { hasText: 'Nostradamus' });
+  eq(await locked.locator('button', { hasText: 'Récupérer' }).count(), 0, 'récompense non acquise réclamable');
 });
 
 await step('Classement des parieurs : avatar équipé visible', async () => {
@@ -203,7 +231,7 @@ await step('Déconnexion par le menu du compte', async () => {
 });
 
 // ================= PARCOURS ADMIN =================
-const expected = () => 10000 - STAKES.motogp - STAKES.nascar - 50 - 500 - 700;
+const expected = () => 10000 - STAKES.motogp - STAKES.nascar - 50 - 500 - 700 - collectionCost;
 
 await step('Connexion admin', async () => {
   await page.fill('input[type=email]', ADMIN.email);
@@ -264,7 +292,7 @@ await step('Catalogue boutique : retirer puis remettre en vente un article', asy
   await page.locator('.shop-views .tab', { hasText: 'Gestion' }).click();
   const row = page.locator('.shop-admin-table tr', { hasText: 'Monoplace' });
   await row.waitFor();
-  eq((await row.locator('td.num').innerText()).trim(), '1', 'ventes');
+  eq((await row.locator('td[data-sold]').innerText()).trim(), '1', 'ventes');
   await row.locator('button', { hasText: 'retirer' }).click();
   await toast('success', 'retiré');
   if ((await (await page.request.get(`${API}/shop/products`)).json()).some(p => p.slug === 'av_f1')) throw new Error('encore en vente');
@@ -290,6 +318,7 @@ const sql = `
 SET @ids = (SELECT GROUP_CONCAT(id) FROM users WHERE email LIKE 'e2e%@test.fr');
 DELETE FROM bets WHERE FIND_IN_SET(user_id, @ids);
 DELETE FROM purchases WHERE FIND_IN_SET(user_id, @ids);
+DELETE FROM wishlist WHERE FIND_IN_SET(user_id, @ids);
 DELETE FROM token_transactions WHERE FIND_IN_SET(user_id, @ids);
 DELETE FROM password_resets WHERE FIND_IN_SET(user_id, @ids);
 DELETE FROM users WHERE FIND_IN_SET(id, @ids);

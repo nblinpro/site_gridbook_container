@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import PageHeader from "../components/ui/PageHeader";
 import EmptyState from "../components/ui/EmptyState";
 import UserAvatar from "../components/cosmetics/UserAvatar";
+import UserName from "../components/cosmetics/UserName";
 import { useAuth } from "../auth/AuthContext";
 import { useDiscipline } from "../components/discipline/DisciplineContext";
 import { DISCIPLINES } from "../data/disciplines";
@@ -31,7 +32,7 @@ function PodiumCard({ player, rank, isMe }) {
       <span className={`pos pos-${rank}`}>{rank}</span>
       <UserAvatar username={player.username} cosmetics={player.cosmetics} size={rank === 1 ? 80 : 72} glow={rank === 1} />
       <div className="lb-podium-id">
-        <span className="lb-podium-name">{player.username}{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
+        <span className="lb-podium-name"><UserName name={player.username} cosmetics={player.cosmetics} />{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
         {player.cosmetics?.title && <span className="ua-title">{player.cosmetics.title}</span>}
       </div>
       <span className="lb-podium-wallet num">{formatApex(player.wallet)} <small>APEX</small></span>
@@ -178,7 +179,7 @@ export default function Leaderboard() {
                               <span className="bettor-cell">
                                 <UserAvatar username={p.username} cosmetics={p.cosmetics} size={32} />
                                 <span className="driver-cell-text">
-                                  <span className="strong">{p.username}{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
+                                  <span className="strong"><UserName name={p.username} cosmetics={p.cosmetics} />{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
                                   {p.cosmetics?.title && <span className="ua-title">{p.cosmetics.title}</span>}
                                 </span>
                               </span>

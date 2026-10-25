@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import UserAvatar from "../../components/cosmetics/UserAvatar";
+import UserName from "../../components/cosmetics/UserName";
 import { useAuth } from "../../auth/AuthContext";
 import apiClient from "../../services/apiClient";
 import { formatApiError } from "../../services/apiError";
@@ -112,7 +113,7 @@ function BettorsTable({ rows, me }) {
                   <span className="bettor-cell">
                     <UserAvatar username={u.username} cosmetics={u.cosmetics} size={32} />
                     <span className="driver-cell-text">
-                      <span className="strong">{u.username}{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
+                      <span className="strong"><UserName name={u.username} cosmetics={u.cosmetics} />{isMe && <span className="badge badge-sport me-badge">Toi</span>}</span>
                       {u.cosmetics?.title && <span className="ua-title">{u.cosmetics.title}</span>}
                     </span>
                   </span>

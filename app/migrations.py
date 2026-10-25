@@ -11,6 +11,15 @@ logger = logging.getLogger(__name__)
 # ajoutées ici, une seule fois (sans effet si elles existent déjà).
 COLUMNS = [
     ("races", "circuit_id", "INT NULL", "FOREIGN KEY (circuit_id) REFERENCES circuits(id)"),
+    # Boutique 2 : collections, éditions limitées et numérotées, récompenses à gagner
+    ("products", "collection_id", "INT NULL", "FOREIGN KEY (collection_id) REFERENCES collections(id)"),
+    ("products", "featured", "BOOLEAN NOT NULL DEFAULT FALSE", None),
+    ("products", "available_from", "DATETIME NULL", None),
+    ("products", "available_until", "DATETIME NULL", None),
+    ("products", "stock", "INT NULL", None),
+    ("products", "unlock_rule", "JSON NULL", None),
+    ("products", "created_at", "DATETIME NULL DEFAULT CURRENT_TIMESTAMP", None),
+    ("purchases", "serial", "INT NULL", None),
 ]
 
 

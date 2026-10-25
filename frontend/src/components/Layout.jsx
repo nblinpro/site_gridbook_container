@@ -8,6 +8,7 @@ import { useDiscipline } from "./discipline/DisciplineContext";
 import { useToast } from "./toast/ToastContext";
 import ConfirmDialog from "./confirm/ConfirmDialog";
 import UserAvatar from "./cosmetics/UserAvatar";
+import UserName from "./cosmetics/UserName";
 import Icon from "./ui/Icon";
 import "./layout.css";
 
@@ -170,7 +171,7 @@ export default function Layout({ children, rail = true }) {
                   <div className="user-menu-head">
                     <UserAvatar username={user?.username} cosmetics={user?.cosmetics} size={44} />
                     <div className="user-menu-id">
-                      <strong className="truncate">{user?.username}</strong>
+                      <strong className="truncate"><UserName name={user?.username} cosmetics={user?.cosmetics} /></strong>
                       {user?.cosmetics?.title ? <span className="ua-title">{user.cosmetics.title}</span> : <span className="muted">{isAdmin ? "Administrateur" : "Parieur"}</span>}
                     </div>
                   </div>
@@ -208,7 +209,7 @@ export default function Layout({ children, rail = true }) {
             <div className="drawer-head">
               <UserAvatar username={user?.username} cosmetics={user?.cosmetics} size={44} />
               <div className="user-menu-id">
-                <strong>{user?.username}</strong>
+                <strong><UserName name={user?.username} cosmetics={user?.cosmetics} /></strong>
                 <span className="num muted">{fmt(user?.wallet)} APEX</span>
               </div>
               <button className="btn btn-ghost btn-icon" aria-label="Fermer le menu" onClick={() => setDrawerOpen(false)}><Icon name="close" size={20} /></button>

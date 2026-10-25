@@ -1,0 +1,177 @@
+/* Couleurs de rareté : propres à la boutique */
+.shop-page, .shop-modal {
+  --rarity-common: var(--text-3);
+  --rarity-rare: var(--info);
+  --rarity-epic: #b37bff;
+  --rarity-legendary: var(--gold);
+}
+
+/* ============ EN-TÊTE ET APERÇU ============ */
+.shop-header { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-6); flex-wrap: wrap; }
+.shop-header .page-header { flex: 1 1 420px; }
+.shop-preview { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); min-width: 320px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.shop-preview-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.shop-preview-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-3); }
+.shop-preview-name { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; text-transform: uppercase; line-height: 1.1; }
+.shop-preview-wallet { font-size: var(--fs-sm); color: var(--text-2); }
+.shop-preview-wallet .num { color: var(--success); font-weight: 600; }
+.shop-views .tab { display: inline-flex; align-items: center; gap: var(--sp-2); }
+
+/* ============ VITRINE « À LA UNE » ============ */
+.shop-featured { display: flex; flex-direction: column; gap: var(--sp-8); }
+.shop-hero {
+  --accent: var(--sport);
+  position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--sp-6); align-items: center;
+  padding: var(--sp-8); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background:
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--surface-1)), var(--surface-1) 60%);
+}
+.shop-hero::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--accent); }
+.shop-hero-text { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.shop-hero-tags { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.shop-hero-badge { background: var(--accent); color: #111; }
+.shop-hero-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 800; text-transform: uppercase; line-height: 1; letter-spacing: 0.01em; }
+.shop-hero-buy { display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; margin-top: var(--sp-2); }
+.shop-hero-price { display: flex; align-items: baseline; gap: var(--sp-2); }
+.shop-hero-price s { font-size: var(--fs-md); }
+.shop-hero-price strong { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; }
+.shop-hero-price small { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--text-3); }
+.shop-hero-cta { background: var(--accent); color: #111; }
+.shop-hero-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 85%, #fff); }
+.shop-hero-cta:disabled { background: var(--surface-3); color: var(--text-3); opacity: 1; }
+.shop-hero-owned, .shop-hero-note { font-size: var(--fs-sm); }
+.shop-hero-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: var(--sp-3); }
+.shop-hero-item {
+  --rarity: var(--rarity-common);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); min-height: 120px; padding: var(--sp-3);
+  background: color-mix(in srgb, var(--surface-1) 75%, transparent); border: 1px solid var(--border); border-top: 2px solid var(--rarity); border-radius: var(--radius-md); text-align: center;
+}
+.shop-hero-item.rare { --rarity: var(--rarity-rare); }
+.shop-hero-item.epic { --rarity: var(--rarity-epic); }
+.shop-hero-item.legendary { --rarity: var(--rarity-legendary); }
+.shop-hero-item .shop-visual-title, .shop-hero-item .shop-visual-name { font-size: var(--fs-sm); }
+.shop-hero-item-name { font-size: var(--fs-xs); color: var(--text-2); line-height: 1.3; }
+
+/* ============ BARRE DE FILTRES ============ */
+.shop-toolbar { display: flex; flex-direction: column; gap: var(--sp-3); }
+.shop-search { position: relative; display: flex; align-items: center; max-width: 520px; }
+.shop-search .icon { position: absolute; left: var(--sp-3); color: var(--text-3); pointer-events: none; }
+.shop-search .input { padding-left: 38px; }
+.shop-toolbar-row { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.shop-select .select { min-width: 190px; }
+.shop-check { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-2); cursor: pointer; }
+.shop-check input { width: 16px; height: 16px; accent-color: var(--sport); }
+.shop-count { margin-left: auto; font-size: var(--fs-sm); }
+
+/* ============ CARTES ARTICLES ============ */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-4); }
+.shop-card {
+  --rarity: var(--rarity-common);
+  position: relative; gap: var(--sp-2); padding: var(--sp-4); border-top: 3px solid var(--rarity);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rarity) 8%, var(--surface-1)), var(--surface-1) 55%);
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.shop-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--rarity) 45%, var(--border)); border-top-color: var(--rarity); }
+.shop-card.rare { --rarity: var(--rarity-rare); }
+.shop-card.epic { --rarity: var(--rarity-epic); }
+.shop-card.legendary { --rarity: var(--rarity-legendary); box-shadow: 0 0 24px color-mix(in srgb, var(--rarity-legendary) 10%, transparent); }
+.shop-card.equipped { box-shadow: 0 0 0 1px var(--success) inset; }
+
+.shop-card-top { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); padding-right: 28px; }
+.rarity-text { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em; color: var(--rarity-common); }
+.rarity-text.rare { color: var(--rarity-rare); }
+.rarity-text.epic { color: var(--rarity-epic); }
+.rarity-text.legendary { color: var(--rarity-legendary); }
+.shop-card-cat { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); color: var(--text-3); }
+.shop-sport-tag { padding: 1px 6px; border-radius: 4px; font-size: 0.625rem; font-weight: 700; }
+
+.shop-card-visual { height: 112px; width: 100%; display: grid; place-items: center; border-radius: var(--radius-md); position: relative; }
+.shop-card-visual:not(.is-static):hover { background: color-mix(in srgb, var(--rarity) 8%, transparent); }
+.shop-visual-title { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; color: var(--gold); text-align: center; text-transform: uppercase; letter-spacing: 0.02em; }
+.shop-visual-name { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; text-transform: uppercase; }
+.shop-card-body { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+.shop-card-name { font-size: var(--fs-md); font-weight: 600; }
+.shop-card-collection { font-size: var(--fs-xs); color: var(--text-3); }
+.shop-flags { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+
+.shop-wish { position: absolute; top: var(--sp-3); right: var(--sp-3); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; line-height: 1; color: var(--text-3); }
+.shop-wish:hover { color: var(--text); background: var(--surface-3); }
+.shop-wish.on { color: #ff4d6d; }
+
+.shop-card-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); padding-top: var(--sp-3); border-top: 1px solid var(--border); }
+.shop-price { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1; }
+.shop-price small { font-family: var(--font-ui); font-size: 0.625rem; color: var(--text-3); font-weight: 700; }
+.shop-price s { font-size: var(--fs-md); margin-right: 4px; }
+.shop-buy { background: var(--rarity, var(--sport)); color: #111; }
+.shop-buy:hover:not(:disabled) { background: color-mix(in srgb, var(--rarity, var(--sport)) 85%, #fff); }
+.shop-card.common .shop-buy, .shop-modal.common .shop-buy { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-strong); }
+.shop-buy:disabled { background: var(--surface-2); color: var(--text-3); opacity: 1; }
+
+/* ============ RÉCOMPENSES ============ */
+.shop-reward.locked .shop-card-visual > :first-child { filter: grayscale(0.9) brightness(0.65); }
+.shop-lock { position: absolute; bottom: 6px; right: calc(50% - 46px); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); border: 1px solid var(--border-strong); color: var(--text-2); }
+.shop-reward-condition { font-size: var(--fs-sm); color: var(--text-2); }
+.shop-reward-count { font-size: var(--fs-xs); }
+.shop-reward-hint { font-size: var(--fs-sm); }
+
+/* ============ COLLECTIONS ============ */
+.shop-collections { display: flex; flex-direction: column; gap: var(--sp-6); }
+.shop-collection { --accent: var(--sport); border-top: 3px solid var(--accent); }
+.shop-collection-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-4); flex-wrap: wrap; }
+.shop-collection-head > div:first-child { display: flex; flex-direction: column; gap: var(--sp-2); max-width: 640px; }
+.shop-collection-progress { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-xs); }
+.shop-collection-progress .progress { width: 180px; }
+.shop-collection-progress .progress > span { background: var(--accent); }
+.shop-collection-buy { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+
+/* ============ FICHE ARTICLE (FENÊTRE) ============ */
+.shop-modal-overlay { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: var(--sp-4); background: var(--overlay); animation: fade 160ms; }
+.shop-modal {
+  --rarity: var(--rarity-common);
+  position: relative; width: min(820px, 100%); max-height: calc(100vh - 32px); overflow-y: auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  background: var(--surface-1); border: 1px solid var(--border-strong); border-top: 3px solid var(--rarity); border-radius: var(--radius-lg); box-shadow: var(--shadow-3);
+}
+.shop-modal.rare { --rarity: var(--rarity-rare); }
+.shop-modal.epic { --rarity: var(--rarity-epic); }
+.shop-modal.legendary { --rarity: var(--rarity-legendary); }
+.shop-modal-close { position: absolute; top: var(--sp-3); right: var(--sp-3); z-index: 1; }
+.shop-modal-stage {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3); padding: var(--sp-8) var(--sp-6); text-align: center;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rarity) 22%, transparent), transparent 65%), var(--surface-2);
+}
+.shop-modal-stage-label { font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.shop-modal-username { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; text-transform: uppercase; line-height: 1; }
+.shop-modal-info { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-6); }
+.shop-modal-tags { display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-xs); }
+.shop-modal-name { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; text-transform: uppercase; padding-right: 40px; }
+.shop-modal-facts { margin: var(--sp-2) 0 0; display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.shop-modal-facts dt, .shop-modal-facts dd { margin: 0; }
+.shop-modal-actions { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: auto; padding-top: var(--sp-2); }
+.shop-modal .shop-buy { --rarity: inherit; }
+.shop-modal-wish.on { color: #ff4d6d; }
+
+/* ============ GESTION (ADMIN) ============ */
+.shop-admin { gap: var(--sp-4); }
+.shop-admin-table tr.inactive td:not(:last-child) { opacity: 0.5; }
+.shop-admin-sub { display: block; font-size: var(--fs-xs); color: var(--text-3); }
+.shop-price-edit { display: inline-flex; gap: var(--sp-2); }
+.shop-price-edit .input { width: 96px; }
+
+/* ============ ADAPTATION ============ */
+@media (max-width: 900px) {
+  .shop-hero { grid-template-columns: minmax(0, 1fr); padding: var(--sp-5); }
+  .shop-modal { grid-template-columns: minmax(0, 1fr); }
+  .shop-modal-stage { padding: var(--sp-6) var(--sp-4); }
+}
+@media (max-width: 700px) {
+  .shop-preview { min-width: 0; width: 100%; }
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: var(--sp-3); }
+  .shop-card { padding: var(--sp-3); }
+  .shop-card-foot { flex-wrap: wrap; }
+  .shop-card-foot .btn { width: 100%; }
+  .shop-select .select { min-width: 0; }
+  .shop-count { margin-left: 0; }
+  .shop-hero-title { font-size: var(--fs-2xl); }
+}

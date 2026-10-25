@@ -37,3 +37,7 @@
   color: var(--ua-title-color, var(--gold));
   text-transform: uppercase;
 }
+
+/* Pseudo coloré (boutique) */
+.un { font-weight: inherit; }
+.un-gradient { background: var(--un-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }

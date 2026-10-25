@@ -13,6 +13,21 @@ const KINDS = {
 
 const RELEASES = [
   {
+    version: "2.1.0",
+    date: "2026-10-25",
+    dateLabel: "25 oct. 2026",
+    title: "Nouvelle boutique et sécurité renforcée",
+    summary: "Une vraie boutique avec collections, éditions limitées et récompenses à gagner, et un site plus sûr.",
+    changes: [
+      ["new", "Boutique repensée : vitrine « À la une », catalogue avec recherche, filtres et tri, fiche détaillée avec essayage sur ton profil."],
+      ["new", "Collections achetables en lot avec remise, dont la collection éphémère « Nuit de Las Vegas » et l'« Édition Champion 2026 » numérotée."],
+      ["new", "Récompenses à gagner en jouant (premier pronostic, série de victoires, Grand Chelem…), à récupérer dans la boutique."],
+      ["new", "Couleur du pseudo, visible dans les classements et le menu du compte. Liste de souhaits et historique des achats."],
+      ["improved", "Sécurité : contrôles renforcés sur les montants et les saisies, protection contre les tentatives de connexion répétées, base de données mise à jour."],
+      ["fixed", "Une erreur réseau passagère ne déconnecte plus le joueur."],
+    ],
+  },
+  {
     version: "2.0.0",
     date: "2026-10-23",
     dateLabel: "23 oct. 2026",

@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import RaceDetails from "../pages/f1/RaceDetails";
 import RaceResults from "../pages/f1/RaceResults";
 import PlaceBet from "../pages/PlaceBet";
-import Shop from "../pages/Shop";
+import Shop from "../pages/shop/Shop";
 import Leaderboard from "../pages/Leaderboard";
 import PatchNotes from "../pages/PatchNotes";
 import BetHistory from "../pages/BetHistory";

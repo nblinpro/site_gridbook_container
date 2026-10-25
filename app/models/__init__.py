@@ -8,4 +8,4 @@ from .season import Season
 from .team import Team
 from .password_reset import PasswordReset
 from .token_transaction import TokenTransaction
-from .shop import Product, Purchase
+from .shop import Collection, Product, Purchase, WishlistItem
