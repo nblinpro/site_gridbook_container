@@ -1,0 +1,8 @@
+# Tableau de bord Traefik, servi uniquement sur le point d'entrée « dashboard »
+# (port 8088 publié sur 127.0.0.1 : accessible depuis la machine ou par tunnel SSH).
+http:
+  routers:
+    dashboard:
+      entryPoints: [dashboard]
+      rule: "PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      service: api@internal

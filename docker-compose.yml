@@ -82,7 +82,25 @@ services:
       - ./docker/frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/frontend/proxy-api.inc:/etc/nginx/conf.d/proxy-api.inc:ro
     ports:
-      - "${FRONTEND_PORT:-5174}:8080"
+      # Accès direct (développement, tunnel SSH / VS Code). En recette et en production, le site
+      # passe par Traefik : FRONTEND_BIND=127.0.0.1 pour ne plus l'exposer sur le réseau.
+      - "${FRONTEND_BIND:-0.0.0.0}:${FRONTEND_PORT:-5174}:8080"
+    networks:
+      - default
+      - proxy
+    # Publication derrière Traefik (deploy/traefik) : un nom de domaine par environnement.
+    # Les noms de routeur doivent être uniques par environnement (TRAEFIK_ROUTER).
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}.rule=Host(`${APP_HOST:-dev-gridbook.visioninfo.fr}`)"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}.entrypoints=web"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}.service=${TRAEFIK_ROUTER:-gridbook-dev}"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}-tls.rule=Host(`${APP_HOST:-dev-gridbook.visioninfo.fr}`)"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}-tls.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}-tls.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${TRAEFIK_ROUTER:-gridbook-dev}-tls.service=${TRAEFIK_ROUTER:-gridbook-dev}"
+      - "traefik.http.services.${TRAEFIK_ROUTER:-gridbook-dev}.loadbalancer.server.port=8080"
     read_only: true
     tmpfs:
       - /tmp
@@ -90,6 +108,11 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+
+networks:
+  # Réseau partagé avec Traefik, créé une fois : docker network create --subnet 172.30.0.0/24 proxy
+  proxy:
+    external: true
 
 volumes:
   db_data:

@@ -1,6 +1,7 @@
 import logging
 
 from app.utils.validation import checked_amount
+from app.utils.race_state import race_has_started, race_is_open
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -269,7 +270,7 @@ def get_my_bets(db: Session = Depends(get_db), user: User = Depends(get_current_
             "amount": bet.amount,
             "odds": display_odds,
             "status": bet.status,
-            "is_open": race.is_open if race else (bet.status == "pending"), # <--- INDISPENSABLE POUR REACT
+            "is_open": race_is_open(race) if race else (bet.status == "pending"),  # annulable tant que vrai
             "race_name": race.name if race else SEASON_BET_TYPES.get(bet.bet_type, (None, "Inconnue"))[1],
             "race_date": race.start_datetime.isoformat() if race and race.start_datetime else None,
             "driver_name": selection_name,
@@ -289,8 +290,10 @@ def cancel_bet(bet_id: int, db: Session = Depends(get_db), user: User = Depends(
         raise HTTPException(status_code=400, detail="Impossible d'annuler")
 
     race = db.query(Race).filter(Race.id == bet.race_id).first()
-    if race and race.status != "upcoming":
-        raise HTTPException(status_code=400, detail="La course a commencé")
+    # Pas d'annulation une fois le départ donné, même si le résultat n'est pas encore publié :
+    # sinon un joueur pourrait retirer sa mise en voyant la course mal tourner.
+    if race and (race.status != "upcoming" or race_has_started(race)):
+        raise HTTPException(status_code=400, detail="La course a commencé : le pari ne peut plus être annulé")
 
     locked_user = db.query(User).filter(User.id == user.id).with_for_update().one()
     locked_user.wallet = float(locked_user.wallet) + float(bet.amount)

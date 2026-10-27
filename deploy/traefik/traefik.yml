@@ -1,0 +1,70 @@
+# Configuration statique de Traefik (lue au démarrage).
+
+entryPoints:
+  web:
+    address: ":80"
+    forwardedHeaders:
+      # Adresses dont on accepte l'en-tête X-Forwarded-For : tunnel Cloudflare éventuel
+      # (conteneur cloudflared, 172.30.0.3) et adresses de Cloudflare (https://www.cloudflare.com/ips/).
+      # Jamais toute la plage 172.30.0.0/24 : sa passerelle (.1) fait entrer le trafic des ports
+      # publiés, et un visiteur pourrait alors annoncer n'importe quelle adresse.
+      trustedIPs: &trusted
+        - 172.30.0.3/32
+        - 173.245.48.0/20
+        - 103.21.244.0/22
+        - 103.22.200.0/22
+        - 103.31.4.0/22
+        - 141.101.64.0/18
+        - 108.162.192.0/18
+        - 190.93.240.0/20
+        - 188.114.96.0/20
+        - 197.234.240.0/22
+        - 198.41.128.0/17
+        - 162.158.0.0/15
+        - 104.16.0.0/13
+        - 104.24.0.0/14
+        - 172.64.0.0/13
+        - 131.0.72.0/22
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      trustedIPs: *trusted
+  dashboard:
+    address: ":8088"
+
+providers:
+  docker:
+    # Seuls les conteneurs qui portent « traefik.enable=true » sont publiés
+    exposedByDefault: false
+    network: proxy
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+api:
+  dashboard: true
+
+certificatesResolvers:
+  # Certificats Let's Encrypt par défi DNS : fonctionne même si la machine n'est pas joignable
+  # directement depuis Internet (derrière un routeur ou Cloudflare). Nécessite CF_DNS_API_TOKEN.
+  letsencrypt:
+    acme:
+      email: admin@visioninfo.fr
+      storage: /letsencrypt/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+
+accessLog:
+  fields:
+    headers:
+      defaultMode: drop
+
+log:
+  level: INFO
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false

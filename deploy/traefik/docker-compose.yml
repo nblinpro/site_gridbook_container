@@ -1,0 +1,64 @@
+# Reverse proxy commun à tous les environnements GridBook de la machine (dev, recette, prod).
+# Il reçoit le trafic web sur les ports 80 et 443 et l'envoie au bon site selon le nom de domaine :
+#   dev-gridbook.visioninfo.fr → stack de développement
+#   rec-gridbook.visioninfo.fr → stack de recette
+#   gridbook.visioninfo.fr     → stack de production
+# Les sites se déclarent eux-mêmes par des labels Docker (voir docker-compose.yml à la racine).
+#
+# Prérequis (une seule fois) : docker network create --subnet 172.30.0.0/24 proxy
+# Lancement : docker compose --env-file .env up -d   (depuis ce dossier)
+name: traefik
+
+services:
+  traefik:
+    image: traefik:v3.7.14
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    environment:
+      # Jeton d'API Cloudflare (droit « Zone DNS : modification ») pour les certificats Let's Encrypt.
+      # Vide = pas de certificat automatique (HTTP seulement, ou certificat géré par Cloudflare).
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:-}
+    ports:
+      - "${HTTP_BIND:-0.0.0.0}:80:80"
+      - "${HTTPS_BIND:-0.0.0.0}:443:443"
+      # Tableau de bord Traefik : machine hôte uniquement
+      - "127.0.0.1:${DASHBOARD_PORT:-8088}:8088"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      proxy:
+        # Adresse fixe : nginx (docker/frontend/nginx.conf) ne fait confiance qu'à elle pour
+        # X-Forwarded-For. 172.30.0.3 est réservée à un éventuel tunnel Cloudflare (cloudflared).
+        ipv4_address: 172.30.0.2
+    security_opt:
+      - no-new-privileges:true
+
+  # Tunnel Cloudflare (facultatif) : publie les sites sans ouvrir de port sur le routeur.
+  # Activation : TUNNEL_TOKEN dans .env, puis docker compose --profile tunnel up -d
+  # Dans Cloudflare Zero Trust, chaque nom public (dev-gridbook, rec-gridbook…) pointe vers
+  # http://traefik:80 ; Traefik choisit ensuite le site selon le nom de domaine.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.0
+    profiles: [tunnel]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - traefik
+    networks:
+      proxy:
+        ipv4_address: 172.30.0.3
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  letsencrypt:

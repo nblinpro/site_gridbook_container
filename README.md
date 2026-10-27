@@ -155,6 +155,13 @@ dossier. Le volume survit aux `down` et aux rebuilds ; seul `down -v` l'efface.
 La structure des tables est définie dans `app/models/` et créée automatiquement au démarrage
 (`app/migrations.py` ajoute les colonnes apparues ensuite).
 
+### Publication derrière Traefik
+
+Les trois environnements (dev, recette, production) passent par un reverse proxy Traefik commun,
+qui choisit le site selon le nom de domaine : `dev-gridbook.visioninfo.fr`,
+`rec-gridbook.visioninfo.fr`, `gridbook.visioninfo.fr`. Mise en place, réglages par environnement
+et publication sur Internet : [`deploy/README.md`](deploy/README.md).
+
 ## Importer des données
 
 ### 1. Courses, pilotes, équipes, circuits, résultats : depuis les API

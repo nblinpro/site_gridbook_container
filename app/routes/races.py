@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.race import Race
+from app.utils.race_state import race_is_open
 from app.models.season import Season
 from app.utils.discipline import get_discipline
 from app.utils.dependencies import get_db, get_current_user
@@ -27,7 +28,7 @@ def _serialize_race(race: Race) -> dict:
         "name": race.name,
         "start_datetime": race.start_datetime,
         "status": race.status,
-        "is_open": race.is_open,
+        "is_open": race_is_open(race),
         "year": race.season.year if race.season else None,
         "discipline": race.season.discipline.slug if race.season and race.season.discipline else None,
         "winner_name": race.winner.name if race.winner else None,
