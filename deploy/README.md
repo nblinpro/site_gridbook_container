@@ -37,9 +37,8 @@ docker compose --env-file .env up -d
 
 - Version figée : `traefik:v3.7.14`. Les versions 3.1 et antérieures ne fonctionnent pas avec
   Docker 29 (API trop ancienne).
-- Tableau de bord : http://127.0.0.1:8088/dashboard/ sur la machine, ou depuis un autre poste par
-  tunnel SSH : `ssh -L 8088:127.0.0.1:8088 utilisateur@machine`.
-- Les routeurs actifs : `curl -s http://127.0.0.1:8088/api/http/routers`.
+- Pas de tableau de bord (désactivé volontairement) : les routes se vérifient dans les journaux
+  (`docker compose logs traefik`) ou en appelant chaque nom de domaine (voir « Vérifier »).
 
 ## 2. Réglages par environnement
 

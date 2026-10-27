@@ -29,20 +29,12 @@ entryPoints:
     address: ":443"
     forwardedHeaders:
       trustedIPs: *trusted
-  dashboard:
-    address: ":8088"
 
 providers:
   docker:
     # Seuls les conteneurs qui portent « traefik.enable=true » sont publiés
     exposedByDefault: false
     network: proxy
-  file:
-    directory: /etc/traefik/dynamic
-    watch: true
-
-api:
-  dashboard: true
 
 certificatesResolvers:
   # Certificats Let's Encrypt par défi DNS : fonctionne même si la machine n'est pas joignable
