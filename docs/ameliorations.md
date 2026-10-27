@@ -187,8 +187,9 @@ Extension possible : une page « Champions » par championnat qui liste le champ
   erreurs que les joueurs rencontrent.
 - **Dépôt distant** (S) : `Gridbook_new` est sous Git en local seulement. Le pousser sur GitHub,
   par exemple sur un dépôt dédié ou une branche du dépôt GridBook.
-- **Ménage** (S) : `close_bets.py` et `test_api.py` à la racine sont des scripts de l'ancien
-  projet, à supprimer ou à déplacer dans un dossier `scripts/`.
+- **Ménage** (S) : `test_api.py` et `run.py` à la racine sont des scripts de l'ancien projet,
+  à supprimer ou à déplacer dans un dossier `scripts/` (`close_bets.py`, qui contenait des
+  identifiants en clair, a déjà été supprimé).
 
 ## 7. Feuille de route proposée
 
