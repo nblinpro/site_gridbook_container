@@ -4,6 +4,89 @@ Plateforme de paris virtuels (monnaie APEX) sur les sports mécaniques, dérivé
 Même base (FastAPI + React + MySQL), même identité visuelle, étendue à plusieurs championnats.
 Chaque sport dispose de cinq pages : **dashboard, calendrier, classement, paris de saison, historique**.
 
+## Architecture
+
+```
+                    Internet
+                       │
+          ┌────────────┴─────────────┐
+          │ Cloudflare (DNS / Tunnel)│  ← facultatif (profil "tunnel")
+          └────────────┬─────────────┘
+                       │ 80 / 443
+┌──────────────────────▼────────────────────────────────────┐
+│ Stack "traefik" (deploy/traefik) — commune à la machine   │
+│  traefik:v3.7.14 (172.30.0.2)   cloudflared (172.30.0.3)  │
+│  • routage par Host : dev- / rec- / gridbook.visioninfo.fr│
+│  • TLS Let's Encrypt (défi DNS Cloudflare)                │
+└──────────────────────┬────────────────────────────────────┘
+                       │ réseau Docker externe "proxy" (172.30.0.0/24)
+┌──────────────────────▼────────────────────────────────────┐
+│ Stack "gridbook_new" (docker-compose.yml) — 1 par env.    │
+│                                                           │
+│  frontend  nginx-unprivileged :8080                       │
+│   • sert le build React (Vite)                            │
+│   • /api/* → proxy vers backend:8000                      │
+│   • rate-limit, CSP, en-têtes de sécurité, real_ip        │
+│        │ réseau "default"                                 │
+│  backend   FastAPI / uvicorn :8000 (127.0.0.1:8001)       │
+│   • JWT en cookie, sync API externes toutes les 6 h       │
+│        │                                                  │
+│  db        MySQL 8.4 (127.0.0.1:3308), volume db_data     │
+└───────────────────────────────────────────────────────────┘
+```
+
+| Service       | Image / build                                  | Port interne | Exposition hôte               | Rôle |
+|---------------|------------------------------------------------|--------------|-------------------------------|------|
+| `traefik`     | `traefik:v3.7.14`                              | 80 / 443     | `0.0.0.0:80`, `0.0.0.0:443`   | Reverse proxy, TLS, routage par domaine |
+| `cloudflared` | `cloudflare/cloudflared:2026.10.0`             | —            | aucune                        | Tunnel Cloudflare (facultatif) |
+| `frontend`    | `node:22-alpine` → `nginx-unprivileged:alpine` | 8080         | `${FRONTEND_BIND}:5174`       | SPA React + proxy `/api` |
+| `backend`     | `python:3.12-slim` + uvicorn                   | 8000         | `127.0.0.1:8001` (débogage)   | API FastAPI |
+| `db`          | `mysql:8.4`                                    | 3306         | `127.0.0.1:3308` (tunnel SSH) | Base de données |
+
+### Flux d'une requête
+
+1. Le navigateur appelle `http(s)://dev-gridbook.visioninfo.fr`.
+2. Traefik (TLS éventuel) transmet au conteneur `frontend` (port 8080) via le réseau `proxy`.
+3. Nginx sert la SPA ; les appels `/api/*` perdent leur préfixe et partent vers `backend:8000`
+   (limite plus stricte sur `/api/auth/*` : 20 requêtes/min).
+4. FastAPI lit l'IP réelle (`--proxy-headers`), vérifie le JWT du cookie, puis interroge MySQL.
+5. En tâche de fond, le backend resynchronise F1, MotoGP et NASCAR toutes les
+   `SYNC_INTERVAL_HOURS` et règle les paris.
+
+### Arborescence
+
+```
+site_gridbook_container/
+├── docker-compose.yml          # stack applicative (db, backend, frontend)
+├── .env.example                # variables : DB, JWT, SMTP, Traefik, ports
+├── docker/
+│   ├── backend/Dockerfile      # python:3.12-slim, user non-root, uvicorn
+│   └── frontend/
+│       ├── Dockerfile          # multi-stage : node:22 (build) → nginx-unprivileged
+│       ├── nginx.conf          # SPA + reverse proxy /api + sécurité
+│       └── proxy-api.inc       # en-têtes X-Forwarded-*
+├── deploy/traefik/             # reverse proxy mutualisé + tunnel Cloudflare
+├── app/                        # BACKEND FastAPI
+│   ├── main.py                 # create_all → migrate → seed → sync → routes
+│   ├── config.py               # SQLAlchemy (MySQL via PyMySQL)
+│   ├── migrations.py / seed.py # migrations maison, comptes admin/test
+│   ├── models/                 # user, bet, race, season, driver, team, circuit,
+│   │                           # discipline, shop, token_transaction, password_reset
+│   ├── routes/                 # auth, bets, races, drivers, teams, disciplines, shop, admin
+│   ├── services/
+│   │   ├── settlement.py       # règlement des paris
+│   │   ├── rewards.py / cosmetics.py / shop_catalog.py
+│   │   └── sync/               # f1.py, motogp.py, nascar.py (API externes)
+│   ├── schemas/                # Pydantic
+│   └── utils/                  # JWT, rate-limit, validation, email, erreurs
+├── frontend/                   # FRONTEND React + Vite
+│   └── src/
+│       ├── router/ auth/ services/ pages/ components/ data/ styles/
+├── e2e/                        # tests bout-en-bout Playwright
+├── test_api.py                 # tests API
+└── docs/                       # design system, cotes, boutique, filières
+```
+
 ## Sports et sources de données
 
 Seuls les championnats disposant d'une **API publique et gratuite** fournissant calendrier,
@@ -78,9 +161,16 @@ Idées pour la suite : `docs/boutique-contenu.md`.
 | Pseudo et mot de passe bornés ; erreurs 422 en français, sans la valeur saisie | `app/schemas/auth_schemas.py`, `app/utils/errors.py` |
 | Limite de tentatives par visiteur (adresse réelle transmise par nginx, non falsifiable) | `app/utils/rate_limit.py`, `docker/frontend/proxy-api.inc` |
 | Limites de débit, taille des requêtes, CSP et en-têtes de sécurité, version masquée | `docker/frontend/nginx.conf` |
+| `X-Forwarded-For` accepté uniquement depuis Traefik, cloudflared et les plages Cloudflare | `deploy/traefik/traefik.yml`, `docker/frontend/nginx.conf` |
 | Base (3308) et API (8001) publiées sur `127.0.0.1` uniquement ; conteneurs sans privilèges, en lecture seule | `docker-compose.yml` |
 | Documentation interactive de l'API désactivée (`ENABLE_API_DOCS=false`) | `app/main.py` |
 | MySQL 8.4 LTS (la branche 8.0 n'a plus de correctifs depuis avril 2026) ; `root` limité au conteneur | `docker-compose.yml` |
+
+Points à surveiller :
+
+- **HSTS** est commenté dans `nginx.conf` : à activer une fois le site servi en HTTPS.
+- **uvicorn** est lancé avec `--forwarded-allow-ips "*"` : acceptable tant que le port 8001 reste
+  sur `127.0.0.1`, mais le restreindre au réseau Docker serait plus propre.
 
 Connexion à la base avec TablePlus : utiliser un tunnel SSH vers la machine, puis
 `127.0.0.1:3308` (le port n'est plus ouvert au réseau).
@@ -92,49 +182,127 @@ GridBook n'utilise pas PHP : les failles PHP (comme PHP2Shell, octobre 2026) ne 
 
 ## Environnement
 
-Cette stack est un **environnement de développement local** (pas une recette) :
+Cette stack est un **environnement de développement** :
 
-- tout tourne sur `localhost`, en HTTP, avec `COOKIE_SECURE=false` ;
+- le site est servi en HTTP, avec `COOKIE_SECURE=false` ;
 - la base (3308) et l'API (8001) sont joignables depuis la machine hôte (127.0.0.1) pour le débogage ;
 - pas de SMTP : les liens « mot de passe oublié » s'affichent dans les logs du backend ;
 - pas de rechargement à chaud : toute modification du code demande un rebuild (voir plus bas).
 
 Pour en faire une **recette**, il faudrait : un serveur et un nom de domaine dédiés, HTTPS
-(`COOKIE_SECURE=true`, `CORS_ORIGINS` / `FRONTEND_URL` sur le domaine), ne plus exposer les
-ports 3308 et 8001 (déjà limités à la machine hôte), configurer le SMTP et des secrets propres, et déployer depuis une branche Git.
+(`COOKIE_SECURE=true`, `CORS_ORIGINS` / `FRONTEND_URL` sur le domaine), `FRONTEND_BIND=127.0.0.1`,
+configurer le SMTP et des secrets propres, et déployer depuis une branche Git.
 
 ## Lancer le site
 
-Prérequis : Docker et Docker Compose. Toutes les commandes se lancent depuis le dossier `Gridbook_new`.
+Prérequis : Docker et Docker Compose. Les commandes se lancent depuis le dossier du dépôt
+(`site_gridbook_container`), sauf indication contraire.
 
-### Premier lancement
+> **Ordre important** : créer le réseau `proxy`, démarrer **Traefik d'abord**, puis l'application.
+> Sinon le conteneur `frontend` peut prendre l'adresse `172.30.0.2` réservée à Traefik, qui
+> échoue alors avec « failed to set up container networking: Address already in use ».
+
+### 1. Réseau partagé (une seule fois par machine)
 
 ```bash
-cd Gridbook_new
-cp .env.example .env      # puis remplacer chaque "change_me"
-chmod 600 .env
-docker compose up -d --build
+docker network create --subnet 172.30.0.0/24 --ip-range 172.30.0.128/25 proxy
 ```
 
-Générer un `JWT_SECRET_KEY` :
-`python3 -c "import secrets; print(secrets.token_urlsafe(48))"`.
+`--ip-range` fait attribuer aux conteneurs des adresses à partir de `.128` : les adresses fixes
+`.2` (Traefik) et `.3` (cloudflared) ne peuvent plus être prises par un autre conteneur.
+
+### 2. Fichiers `.env`
+
+```bash
+cp .env.example .env                              # application
+cp deploy/traefik/.env.example deploy/traefik/.env  # Traefik
+chmod 600 .env deploy/traefik/.env
+nano .env                                         # remplacer chaque "change_me"
+```
+
+Sans `.env`, Compose démarre avec des variables vides (`The "DB_USER" variable is not set…`)
+et MySQL est initialisé sans utilisateur.
+
+Générer les secrets :
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"   # JWT_SECRET_KEY
+openssl rand -hex 16                                             # mots de passe
+```
+
 Éviter les caractères `@ & % : /` dans les mots de passe.
+
+Dans `deploy/traefik/.env`, `CF_DNS_API_TOKEN` peut rester vide tant que la machine n'est pas
+publiée : le site est alors servi en HTTP uniquement.
+
+### 3. Démarrer Traefik, puis l'application
+
+```bash
+cd deploy/traefik
+docker compose up -d
+cd ../..
+docker compose up -d --build
+docker compose ps
+```
+
+Attendu : `db` en `healthy`, `backend` et `frontend` en `Up`.
 
 Au premier démarrage, le backend crée les tables, ajoute les trois sports et le compte admin
 défini dans `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`), puis importe les données des API en
 arrière-plan (quelques secondes).
 
+### 4. Vérifier
+
+```bash
+docker compose logs --tail 30 backend
+docker network inspect proxy --format '{{range .Containers}}{{.Name}} {{.IPv4Address}}{{"\n"}}{{end}}'
+curl -I http://localhost:5174                                         # site direct → 200
+curl -s http://localhost:5174/api/disciplines | head -c 300           # API → JSON
+curl -I -H "Host: dev-gridbook.visioninfo.fr" http://localhost        # via Traefik → 200
+```
+
+`traefik-traefik-1` doit être en `172.30.0.2`. Une **404** via Traefik signifie qu'aucun routeur
+ne correspond : vérifier `APP_HOST` dans `.env` et `docker logs traefik-traefik-1`.
+
+### 5. Accéder au site depuis son poste
+
 | Service | Adresse |
 |---|---|
-| Site | http://localhost:5174 : compte admin `ADMIN_EMAIL` / `ADMIN_PASSWORD`, compte joueur de test `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` (sans droits admin) |
-| API | http://localhost:5174/api (ou http://localhost:8001 depuis la machine hôte) ; documentation `/docs` si `ENABLE_API_DOCS=true` |
-| MySQL | `127.0.0.1:3308`, base `DB_NAME`, utilisateur `DB_USER` |
+| Site (direct) | `http://<IP-VM>:5174` |
+| Site (via Traefik) | `http://dev-gridbook.visioninfo.fr` |
+| API | `/api` sur le site (ou `http://localhost:8001` depuis la VM) ; documentation `/docs` si `ENABLE_API_DOCS=true` |
+| MySQL | `127.0.0.1:3308` depuis la VM, base `DB_NAME`, utilisateur `DB_USER` |
 
-Le site appelle l'API via `/api` (relais nginx) : seul le port 5174 a besoin d'être accessible
-depuis le navigateur.
+Comptes : admin `ADMIN_EMAIL` / `ADMIN_PASSWORD`, joueur de test `TEST_USER_EMAIL` /
+`TEST_USER_PASSWORD` (sans droits admin).
+
+Tant que le DNS ne pointe pas vers la VM, ajouter le nom dans le fichier `hosts` **du poste
+client** (IP de la VM : `hostname -I` sur la VM) :
+
+```
+<IP-VM>  dev-gridbook.visioninfo.fr
+```
+
+| Système | Fichier | Remarques |
+|---|---|---|
+| Windows | `C:\Windows\System32\drivers\etc\hosts` | Bloc-notes en administrateur, filtre « Tous les fichiers », puis `ipconfig /flushdns` |
+| Linux | `/etc/hosts` | `echo "<IP-VM>  dev-gridbook.visioninfo.fr" \| sudo tee -a /etc/hosts` |
+| macOS | `/etc/hosts` | même commande, puis `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` |
+
+Rester en **http** tant que `CF_DNS_API_TOKEN` est vide (pas de certificat valide).
 
 > Si `docker` répond « permission denied », l'utilisateur n'a pas encore les droits du groupe
 > `docker` dans ce terminal : préfixer par `sg docker -c "..."` ou se reconnecter.
+
+### Dépannage
+
+| Symptôme | Cause | Solution |
+|---|---|---|
+| `The "XXX" variable is not set` | `.env` absent | `cp .env.example .env` puis le remplir |
+| `network proxy declared as external, but could not be found` | réseau non créé | étape 1 |
+| Traefik : `Address already in use` | `frontend` a pris `172.30.0.2` | `docker compose down`, démarrer Traefik puis l'application ; recréer le réseau avec `--ip-range` |
+| Traefik : `bind: address already in use` | port 80/443 occupé sur la VM | `sudo ss -tlnp \| grep -E ':(80\|443)\s'`, arrêter Apache/nginx |
+| `db` unhealthy ou « Access denied » | base initialisée avec des variables vides | `docker compose down -v` puis `up -d --build` (**efface la base**) |
 
 ### Commandes courantes
 
@@ -146,6 +314,7 @@ depuis le navigateur.
 | Reconstruire seulement le site | `docker compose build frontend && docker compose up -d frontend` |
 | Arrêter (données conservées) | `docker compose down` |
 | Arrêter **et supprimer la base** | `docker compose down -v` |
+| Redémarrer toute la pile | `docker compose down && (cd deploy/traefik && docker compose up -d) && docker compose up -d` |
 
 ### Où est la base ?
 
@@ -157,10 +326,19 @@ La structure des tables est définie dans `app/models/` et créée automatiqueme
 
 ### Publication derrière Traefik
 
-Les trois environnements (dev, recette, production) passent par un reverse proxy Traefik commun,
-qui choisit le site selon le nom de domaine : `dev-gridbook.visioninfo.fr`,
-`rec-gridbook.visioninfo.fr`, `gridbook.visioninfo.fr`. Mise en place, réglages par environnement
-et publication sur Internet : [`deploy/README.md`](deploy/README.md).
+Les trois environnements passent par le même Traefik, qui choisit le site selon le nom de domaine.
+Chaque environnement a son propre `.env` :
+
+| Environnement | `APP_HOST` | `TRAEFIK_ROUTER` | `FRONTEND_BIND` |
+|---|---|---|---|
+| Développement | `dev-gridbook.visioninfo.fr` | `gridbook-dev` | `0.0.0.0` |
+| Recette | `rec-gridbook.visioninfo.fr` | `gridbook-rec` | `127.0.0.1` |
+| Production | `gridbook.visioninfo.fr` | `gridbook-prod` | `127.0.0.1` |
+
+Certificats Let's Encrypt : renseigner `CF_DNS_API_TOKEN` (droit « Zone DNS : modification »).
+Publication sans ouvrir de port : renseigner `TUNNEL_TOKEN` puis
+`docker compose --profile tunnel up -d` dans `deploy/traefik`.
+Détails : [`deploy/README.md`](deploy/README.md).
 
 ## Importer des données
 
@@ -186,9 +364,9 @@ docker compose exec -T db mysqldump -u gridbook -p GridBookNew > sauvegarde.sql
 
 ### 3. Avec un client graphique (TablePlus, DBeaver…)
 
-Connexion MySQL sur `127.0.0.1`, port `3308` (depuis un autre poste : tunnel SSH vers la machine), utilisateur et mot de passe de `.env`, base
-`GridBookNew`. Puis **Import → From SQL Dump** (fichier `.sql`) ou, sur une table,
-**Import → From CSV**.
+Connexion MySQL sur `127.0.0.1`, port `3308` (depuis un autre poste : tunnel SSH vers la machine),
+utilisateur et mot de passe de `.env`, base `GridBookNew`. Puis **Import → From SQL Dump**
+(fichier `.sql`) ou, sur une table, **Import → From CSV**.
 
 ### Précautions
 
